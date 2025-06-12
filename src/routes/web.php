@@ -9,5 +9,5 @@ Route::group(['middleware' => ['web']], function () {
     Route::get('/login', [AuthController::class, 'showLoginPage'])->name('system.auth.login')->middleware('key.verified');
     // Route::get('/login', [AuthController::class, 'showLoginPage'])->name('system.auth.login');
     Route::post('/login', [AuthController::class, 'login'])->name('system.auth.login.post');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('system.auth.logout');
+    
 });

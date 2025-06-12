@@ -11,7 +11,6 @@ class EnsureKeyVerified
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->is('key') || $request->routeIs('system.auth.key')) {
-            // echo("HEllo");
             return $next($request);
         }
 

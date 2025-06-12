@@ -3,9 +3,13 @@
 namespace Nk\SystemAuth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+// use Http;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use Nk\SystemAuth\Models\SuperAdmin;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\SuperAdminApiController;
+
 
 class AuthController extends Controller
 {
@@ -14,22 +18,26 @@ class AuthController extends Controller
         return view('system-auth::key');
     }
 
-    public function verifyKey(Request $request)
-    {
-        $request->validate([
-            'key' => ['required', 'string', 'max:14'],
-        ]);
-        $key = $request->input('key');
-        $superAdmin = SuperAdmin::where('key' , '=' , $key)->first();
-        if (!$superAdmin || $superAdmin->key !== $request->input('key')) {
-            return redirect()->back()->with('error', 'Invalid Key');
-        }
-        
-        // session(['key_verified' => true]);
-        $request->session()->put('key_verified' , "true");
-        // dd(session('key_verified'));
-        return redirect()->route('system.auth.login');
+   public function verifyKey(Request $request)
+{
+    $request->validate([
+        'key' => ['required', 'max:14'],
+    ]);
+
+    $key = $request->input('key');
+    // $data = (\src\Http\Controllers\SuperAdminApiController::class)->show($key);  
+     $controller = new SuperAdminApiController();
+    $data = $controller->show($key);
+
+    if (!is_array($data) || !isset($data['key']) || $data['key'] !== $key) {
+        // dd("HEllo");
+         return redirect()->route('system.auth.key')->with('error', 'Invalid Key');
     }
+
+    $request->session()->put('key_verified', true);
+
+    return redirect()->route('system.auth.login');
+}
 
     public function showLoginPage()
     {
@@ -52,9 +60,5 @@ class AuthController extends Controller
         return redirect()->route('dashboard');
     }
 
-    public function logout(Request $request)
-    {
-        $request->session()->flush();
-        return redirect()->route('system.auth.key');
-    }
+   
 }

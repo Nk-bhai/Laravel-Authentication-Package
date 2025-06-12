@@ -9,7 +9,7 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <div class="card">
-                    <div class="card-header">Enter License Key</div>
+                    <div class="card-header">Enter Key</div>
                     <div class="card-body">
                         @if (session('error'))
                             <div class="alert alert-danger">{{ session('error') }}</div>
