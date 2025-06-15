@@ -10,78 +10,52 @@ use Illuminate\Support\Facades\Session;
 
 class EnsureKeyVerified
 {
-//     public function handle(Request $request, Closure $next): Response
-//     {
-//         if ($request->is('key') || $request->routeIs('system.auth.key')) {
-//             return $next($request);
-//         }
 
-//         if (!session()->has('key_verified')) {
-//             // dump(session()->has('key_verified'));
-//             return redirect()->route('system.auth.key')->with('error', 'Key verification required');
-//         }
+    public function handle(Request $request, Closure $next): Response
+    {
+        $key = session('session_key');
 
-//         // If key verified, allow to proceed
-//         return $next($request);
-//     }
+        // ✅ STEP 1: Allow access to `/key` if key is not verified
+        if ($request->is('key') || $request->routeIs('system.auth.key')) {
+            // Allow this only if key is not already verified
+            if ($key) {
+                $data = Http::get('http://127.0.0.1:8000/api/superadmin/' . $key);
 
+                if ($data->ok() && $data['verified']) {
+                    return redirect()->route('system.auth.login')->with('message', 'Key already verified');
+                }
+            }
 
+            return $next($request); // Allow access to key page if not yet verified
+        }
 
-// public function handle(Request $request, Closure $next): Response
-// {
-//     if ($request->is('key') || $request->routeIs('system.auth.key')) {
-//         $key = session('session_key');
+        // ✅ STEP 2: Key must be set and verified to proceed
+        if (!$key) {
+            return redirect()->route('system.auth.key')->with('error', 'Key verification required');
+        }
 
-//         if ($key) {
-//             $data = Http::get('http://127.0.0.1:8000/api/superadmin/' . $key);
+        $data = Http::get('http://127.0.0.1:8000/api/superadmin/' . $key);
 
-//             if ($data->ok() && $data['verified']) {
-//                 return redirect()->route('system.auth.login')->with('message', 'Key already verified');
-//             }
-//         }
+        if (!$data->ok() || !$data['verified']) {
+            return redirect()->route('system.auth.key')->with('error', 'Key verification required');
+        }
 
-//         return $next($request);
-//     }
+        // ✅ STEP 3: Allow access to login routes before login
+        if (!session()->has('user_logged_in')) {
+            if (
+                $request->is('login') ||
+                $request->routeIs('system.auth.login') ||
+                $request->routeIs('system.auth.login.attempt')
+            ) {
+                return $next($request); // Allow access to login pages
+            }
 
-//     $key = session('session_key');
-//     if (!$key) {
-//         return redirect()->route('system.auth.key')->with('error', 'Key verification required');
-//     }
-
-//     $data = Http::get('http://127.0.0.1:8000/api/superadmin/' . $key);
-
-//     if (!$data->ok() || !$data['verified']) {
-//         return redirect()->route('system.auth.key')->with('error', 'Key verification required');
-//     }
-
-//     return $next($request);
-// }
-
-public function handle(Request $request, Closure $next): Response
-{
-    $key = session('session_key');
-
-    // 🔒 Check if key is verified via API
-    if (!$key) {
-        return redirect()->route('system.auth.key')->with('error', 'Key verification required');
-    }
-
-    $data = Http::get('http://127.0.0.1:8000/api/superadmin/' . $key);
-
-    if (!$data->ok() || !$data['verified']) {
-        return redirect()->route('system.auth.key')->with('error', 'Key verification required');
-    }
-
-    // 🔒 Allow only /login page if not logged in
-    if (!session()->has('user_logged_in')) {
-        // If trying to access anything other than login, redirect
-        if (!$request->is('login') && !$request->routeIs('system.auth.login') && !$request->routeIs('system.auth.login.attempt')) {
             return redirect()->route('system.auth.login')->with('error', 'Login required');
         }
-    }
 
-    return $next($request);
-}
+        // ✅ STEP 4: Key is verified AND user is logged in — allow
+        return $next($request);
+    }
 
 }
 
