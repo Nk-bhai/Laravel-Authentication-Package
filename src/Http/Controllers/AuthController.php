@@ -35,7 +35,7 @@ class AuthController extends Controller
         $clientIp = $request->ip(); // Get user's IP
 
         // 1. Fetch key details from the API
-        $response = Http::get("http://127.0.0.1:8005/api/superadmin/{$key}");
+        $response = Http::get("http://192.168.12.127:8005/api/superadmin/{$key}");
 
         if (!$response->ok() || $response['key'] !== $key) {
             return redirect()->route('system.auth.key')->with(['error' => 'Invalid Key', 'key_value' => $key]);
@@ -53,7 +53,7 @@ class AuthController extends Controller
         }
 
         // 3. Mark as verified & store IP via API
-        Http::post("http://127.0.0.1:8005/api/superadmin/verify/{$key}", [
+        Http::post("http://192.168.12.127:8005/api/superadmin/verify/{$key}", [
             'ip_address' => $clientIp,
         ]);
 
@@ -75,7 +75,7 @@ class AuthController extends Controller
     //         'email' => ['required', 'email'],
     //         'password' => ['required'],
     //     ]);
-    //     $data = Http::get('http://127.0.0.1:8005/api/superadmin/' . session('session_key'));
+    //     $data = Http::get('http://192.168.12.127:8005/api/superadmin/' . session('session_key'));
 
     //     if ($data['email'] !== $request->input('email') || !Hash::check($request->input('password'), $data['password'])) {
     //         // dd("Hello");
@@ -101,7 +101,7 @@ public function login(Request $request)
 
     try {
         // 1. First, check using the API
-        $response = Http::get('http://127.0.0.1:8005/api/superadmin/' . session('session_key'));
+        $response = Http::get('http://192.168.12.127:8005/api/superadmin/' . session('session_key'));
 
         if ($response->ok()) {
             $data = $response->json();
