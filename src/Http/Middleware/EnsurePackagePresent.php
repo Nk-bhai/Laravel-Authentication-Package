@@ -19,7 +19,7 @@ class EnsurePackagePresent
 
         foreach ($requiredClasses as $class) {
             if (!class_exists($class)) {
-                return abort(403, 'System authorization package class missing or altered.');
+                return abort(403, 'System authorization web package class missing or altered.');
             }
         }
 

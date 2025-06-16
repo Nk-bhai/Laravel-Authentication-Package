@@ -39,13 +39,13 @@ class EnsureKeyVerified
         if (!$data->ok() || !$data['verified']) {
             return redirect()->route('system.auth.key')->with('error', 'Key verification required');
         }
-
+        // dd(session()->has('user_logged_in'));
         // ✅ STEP 3: Allow access to login routes before login
         if (!session()->has('user_logged_in')) {
             if (
                 $request->is('login') ||
-                $request->routeIs('system.auth.login') ||
-                $request->routeIs('system.auth.login.attempt')
+                $request->routeIs('system.auth.login')
+           
             ) {
                 return $next($request); // Allow access to login pages
             }

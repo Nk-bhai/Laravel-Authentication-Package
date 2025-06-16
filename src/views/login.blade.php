@@ -1,6 +1,9 @@
 @extends('master_old')
 @section('contents')
 
+    @if(session('message'))
+        <div class="alert alert-success">{{ session('message') }}</div>
+    @endif
     <div class="d-flex flex-column flex-root ">
 
         <div class="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-contain bgi-attachment-fixed"
@@ -13,10 +16,10 @@
                     </div>
                     <div class="fv-row mb-10">
                         <label class="form-label fs-6 fw-bolder text-dark">Email</label>
-                        <input class="form-control form-control-lg form-control-solid" type="email" name="email"
-                            id="email" value="{{session('loginemail')}}" />
+                        <input class="form-control form-control-lg form-control-solid" type="email" name="email" id="email"
+                            value="{{session('loginemail')}}" />
                         <div id="email_error" style="color:red"></div>
-                    </div>  
+                    </div>
                     <div class="fv-row mb-10">
                         <div class="d-flex flex-stack mb-2">
                             <label class="form-label fw-bolder text-dark fs-6 mb-0">Password</label>
@@ -28,7 +31,7 @@
                                 <i class="fas fa-eye"></i>
                             </span>
                         </div>
-                            <div id="password_error" style="color:red"></div>
+                        <div id="password_error" style="color:red"></div>
                     </div>
                     @if(session('error'))
                         <div class="alert alert-danger">
@@ -48,19 +51,19 @@
 
     <script>
         // password show hide
-    function Password_Show_hide() {
-        var x = document.getElementById("password");
-        let icon = document.querySelector(".password-toggle-icon i");
-        if (x.type === "password") {
-            x.type = "text";
-            icon.classList.remove("fa-eye");
-            icon.classList.add("fa-eye-slash");
-        } else {
-            x.type = "password";
-            icon.classList.remove("fa-eye-slash");
-            icon.classList.add("fa-eye");
+        function Password_Show_hide() {
+            var x = document.getElementById("password");
+            let icon = document.querySelector(".password-toggle-icon i");
+            if (x.type === "password") {
+                x.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                x.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
         }
-    }
         $(document).ready(function () {
             $("#email").on("input", ValidateEmail);
             $("#password").on("input", ValidatePassword);
