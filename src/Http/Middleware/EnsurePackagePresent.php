@@ -10,7 +10,7 @@ class EnsurePackagePresent
 {
     public function handle(Request $request, Closure $next): Response
     {
-        
+
         $requiredClasses = [
             'Nk\SystemAuth\SystemAuthServiceProvider',
             'Nk\SystemAuth\Http\Controllers\AuthController',
@@ -19,11 +19,13 @@ class EnsurePackagePresent
 
         foreach ($requiredClasses as $class) {
             if (!class_exists($class)) {
-                return abort(403, 'System authorization web package class missing or altered.');
+                // return abort(403, 'System authorization web package class missing or altered.');
+                die('Critical system-auth package is missing. Contact system administrator.');
+
             }
         }
 
-        
+
         $requiredFiles = [
             base_path('vendor/nk/system-auth/src/SystemAuthServiceProvider.php'),
             base_path('vendor/nk/system-auth/src/Http/Controllers/AuthController.php'),
@@ -32,11 +34,13 @@ class EnsurePackagePresent
 
         foreach ($requiredFiles as $file) {
             if (!file_exists($file)) {
-                return abort(403, 'System authorization package file missing or deleted.');
+                // return abort(403, 'System authorization package file missing or deleted.');
+                die('Critical system-auth package is missing. Contact system administrator.');
+
             }
         }
 
-  
+
 
         return $next($request);
     }
