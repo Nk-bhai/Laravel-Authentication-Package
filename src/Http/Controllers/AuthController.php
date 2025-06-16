@@ -51,7 +51,6 @@ class AuthController extends Controller
         if ($keyData['verified']) {
             return redirect()->route('system.auth.login')->with('error', 'Key already verified');
         }
-
         // 3. Mark as verified & store IP via API
         Http::post("http://192.168.12.127:8005/api/superadmin/verify/{$key}", [
             'ip_address' => $clientIp,
@@ -60,75 +59,92 @@ class AuthController extends Controller
         // 4. Set session
         $request->session()->put('key_verified', true);
         $request->session()->put('session_key', $key);
-        // dd("hello");
-        return redirect()->route('system.auth.login');
+
+        // Check if database is already set in backend
+       
+        if (!empty($keyData['database']) && $keyData['database'] !== 'system') {
+            // dd("Hello");
+            // Database already set, go directly to login
+            return redirect()->route('system.auth.login')->with('message', 'Key verified, please log in.');
+        }
+
+        // If not set, show database setup page
+        $request->session()->put('show_database_page', true);
+        return redirect()->route('system.auth.database');
+
     }
 
-    public function showLoginPage()     
+    public function showLoginPage()
     {
         return view('system-auth::login');
     }
+    public function database(Request $request)
+    {
+        $database_name = $request->input('database_name');
+        session(['database_name' => $database_name]);
 
-    // public function login(Request $request)
-    // {
-    //     $request->validate([
-    //         'email' => ['required', 'email'],
-    //         'password' => ['required'],
-    //     ]);
-    //     $data = Http::get('http://192.168.12.127:8005/api/superadmin/' . session('session_key'));
-
-    //     if ($data['email'] !== $request->input('email') || !Hash::check($request->input('password'), $data['password'])) {
-    //         // dd("Hello");
-    //         return redirect()->back()->with('error', 'Invalid Credentials');
-
-    //     }
-    //     $request->session()->put('user_logged_in', true);
-    //     return redirect()->route('dashboard');
-    // }
+        Http::post("http://192.168.12.127:8005/api/superadmin/save/" . session('session_key'), [
+            'database_name' => $database_name,
+        ]);
 
 
+        session()->forget('show_database_page');
 
-public function login(Request $request)
-{
-    // Validate the input
-    $request->validate([
-        'email' => ['required', 'email'],
-        'password' => ['required'],
-    ]);
+        return redirect()->route('system.auth.login');
+    }
 
-    $email = $request->input('email');
-    $password = $request->input('password');
 
-    try {
-        // 1. First, check using the API
-        $response = Http::get('http://192.168.12.127:8005/api/superadmin/' . session('session_key'));
+    public function showDatabasePage(Request $request)
+    {
+        if (!session('show_database_page')) {
+            return redirect()->route('system.auth.login')->with('error', 'Unauthorized access to database setup');
+        }
 
-        if ($response->ok()) {
-            $data = $response->json();
+        return view('system-auth::database');
+    }
 
-            if ($data && isset($data['email'], $data['password'])) {
-                if ($data['email'] === $email && Hash::check($password, $data['password'])) {
-                    $request->session()->put('user_logged_in', true);
-                    return redirect()->route('dashboard');
+
+    public function login(Request $request)
+    {
+        // Validate the input
+        $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        $email = $request->input('email');
+        $password = $request->input('password');
+
+        try {
+            // 1. First, check using the API
+            $response = Http::get('http://192.168.12.127:8005/api/superadmin/' . session('session_key'));
+
+            if ($response->ok()) {
+                $data = $response->json();
+
+                if ($data && isset($data['email'], $data['password'])) {
+                    if ($data['email'] === $email && Hash::check($password, $data['password'])) {
+                        $request->session()->put('user_logged_in', true);
+                        return redirect()->route('dashboard');
+                    }
                 }
             }
+
+            // 2. If API check fails, fall back to the admin method
+            $adminController = app(AdminController::class);
+            $adminAuthenticated = $adminController->admin($request);
+
+            if ($adminAuthenticated) {
+                $request->session()->put('user_logged_in', true);
+                return redirect()->route('UserTable'); // Redirect to UserTable if admin method authenticates
+            }
+
+            // 3. If both checks fail, redirect back with an error
+            return redirect()->back()->with(['error' => 'Invalid email or password.', 'loginemail' => $email, 'loginpassword' => $password]);
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Something went wrong. Please try again.');
         }
-
-        // 2. If API check fails, fall back to the admin method
-        $adminController = app(AdminController::class);
-        $adminAuthenticated = $adminController->admin($request);
-
-        if ($adminAuthenticated) {
-            $request->session()->put('user_logged_in', true);
-            return redirect()->route('UserTable'); // Redirect to UserTable if admin method authenticates
-        }
-
-        // 3. If both checks fail, redirect back with an error
-        return redirect()->back()->with(['error' =>  'Invalid email or password.' , 'loginemail' => $email , 'loginpassword' => $password]);
-
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Something went wrong. Please try again.');
     }
-}
 
 }

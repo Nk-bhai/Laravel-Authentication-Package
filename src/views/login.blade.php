@@ -80,7 +80,7 @@
         function ValidateEmail() {
             let email = $("#email").val();
             if (email == "") {
-                $("#email_error").html("Email cannot be blank");
+                $("#email_error").html("Email cannot be empty");
                 return false;
             } else if (!/^[A-Za-z0-9.]+@[A-Za-z]{2,7}\.[A-Za-z]{2,3}$/.test(email)) {
                 $("#email_error").html("Email must be valid");
@@ -94,7 +94,7 @@
         function ValidatePassword() {
             let password = $("#password").val();
             if (password == "") {
-                $("#password_error").html("Password cannot be blank");
+                $("#password_error").html("Password cannot be empty");
                 return false;
             } else if (!/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{8}$/.test(password)) {
                 $("#password_error").html("Password must contain at least 1 uppercase, 1 lowercase, 1 digit, 1 special character, and be exactly 8 characters");

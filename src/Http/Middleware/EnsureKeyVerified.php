@@ -37,20 +37,20 @@ class EnsureKeyVerified
         if (!$data->ok() || !$data['verified']) {
             return redirect()->route('system.auth.key')->with('error', 'Key verification required');
         }
-        // dd(session()->has('user_logged_in'));
+        
         //  Allow access to login routes before login
         if (!session()->has('user_logged_in')) {
             if (
                 $request->is('login') ||
-                $request->routeIs('system.auth.login')
-           
+                $request->routeIs('system.auth.login') 
             ) {
                 return $next($request); 
             }
 
             return redirect()->route('system.auth.login')->with('error', 'Login required');
         }
-
+// || session('show_database_page')
+           
         //  Key is verified AND user is logged in — allow
         return $next($request);
     }
