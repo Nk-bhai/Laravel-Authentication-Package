@@ -5,9 +5,10 @@ namespace Nk\SystemAuth\Http\Controllers;
 use App\Http\Controllers\Controller;
 // use Http;
 use App\Models\UserModel;
+use Artisan;
 use DB;
 use Illuminate\Support\Facades\Http;
-
+use Illuminate\Support\ViewErrorBag;
 use App\Http\Controllers\AdminController;
 use Illuminate\Http\Request;
 use Nk\SystemAuth\Models\SuperAdmin;
@@ -22,11 +23,13 @@ class AuthController extends Controller
     public function showKeyPage()
     {
         return view('system-auth::key');
+
         // return redirect()->route('key');
     }
 
     public function verifyKey(Request $request)
     {
+        // dd("hello");
         $request->validate([
             'key' => ['required', 'max:14'],
         ]);
@@ -61,7 +64,7 @@ class AuthController extends Controller
         $request->session()->put('session_key', $key);
 
         // Check if database is already set in backend
-       
+
         if (!empty($keyData['database']) && $keyData['database'] !== 'system') {
             // dd("Hello");
             // Database already set, go directly to login
@@ -78,8 +81,27 @@ class AuthController extends Controller
     {
         return view('system-auth::login');
     }
+
     public function database(Request $request)
     {
+
+        $request->validate([
+            'database_name' => 'required|alpha_dash|max:20',
+            'host_name' => 'required|string|max:255',
+            'user_name' => 'required',
+            'db_password' => 'sometimes|nullable|string|min:2|max:32', // optional password
+        ]);
+
+        // dd($request->all());
+        updateEnv([
+            'DB_HOST' => $request->input('host_name'),
+            'DB_USERNAME' => $request->input('user_name'),
+            'DB_PASSWORD' => $request->input('db_password'),
+        ]);
+
+        // Optional: Clear config cache
+        // Artisan::call('config:clear');
+        // dd("hello");
         $database_name = $request->input('database_name');
         session(['database_name' => $database_name]);
 
@@ -99,8 +121,11 @@ class AuthController extends Controller
         if (!session('show_database_page')) {
             return redirect()->route('system.auth.login')->with('error', 'Unauthorized access to database setup');
         }
+        // dd("hello");
 
-        return view('system-auth::database');
+        return view('system-auth::database', [
+            'errors' => session()->get('errors', new ViewErrorBag),
+        ]);
     }
 
 
