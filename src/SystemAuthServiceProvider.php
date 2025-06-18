@@ -9,9 +9,9 @@ class SystemAuthServiceProvider extends ServiceProvider
     public function boot()
     {
         // Publish migrations
-        $this->publishes([
-            __DIR__ . '/../database/migrations' => database_path('migrations'),
-        ], 'system-auth-migrations');
+        // $this->publishes([
+        //     __DIR__ . '/../database/migrations' => database_path('migrations'),
+        // ], 'system-auth-migrations');
 
         // Load routes
         $this->loadRoutesFrom(__DIR__ . '/routes/web.php');
@@ -22,6 +22,8 @@ class SystemAuthServiceProvider extends ServiceProvider
         // Register middleware
         $this->app['router']->aliasMiddleware('key.verified', \Nk\SystemAuth\Http\Middleware\EnsureKeyVerified::class);
         $this->app['router']->aliasMiddleware('package.present', \Nk\SystemAuth\Http\Middleware\EnsurePackagePresent::class);
+
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     public function register()

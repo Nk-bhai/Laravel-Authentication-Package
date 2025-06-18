@@ -26,12 +26,21 @@
 </head>
 
 <body>
+    @if (session('errors'))
+        <div class="alert alert-danger">
+            <ul>
+                @foreach (session('errors')->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
     <div class="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
         <form class="form w-100" novalidate="novalidate" id="kt_sign_in_form" action="{{ route('database') }}"
             method="post">
             @csrf
             {{-- @php
-                $errors = $errors ?? new \Illuminate\Support\MessageBag;
+            $errors = $errors ?? new \Illuminate\Support\MessageBag;
             @endphp --}}
             <div class="fv-row mb-10">
                 <label class="form-label fs-6 fw-bolder text-dark">Database Name</label>
@@ -97,6 +106,8 @@
             </div>
         </form>
     </div>
+
+
 </body>
 <script>
     $(document).ready(function () {

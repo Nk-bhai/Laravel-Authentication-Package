@@ -19,6 +19,7 @@
     "autoload": {
         "psr-4": {
             "Nk\\SystemAuth\\": "src/"
+        
         },
         "files": [
              "src/helpers.php"
