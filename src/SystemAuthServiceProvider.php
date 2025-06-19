@@ -28,6 +28,7 @@ class SystemAuthServiceProvider extends ServiceProvider
 
     public function register()
     {
+        
         // Bind any services if needed
         $this->loadHelpers();
     }

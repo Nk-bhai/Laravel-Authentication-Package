@@ -16,6 +16,7 @@ class EnsurePackagePresent
             'Nk\SystemAuth\Http\Controllers\AuthController',
             'Nk\SystemAuth\Http\Middleware\EnsureKeyVerified',
         ];
+        
 
         foreach ($requiredClasses as $class) {
             if (!class_exists($class)) {

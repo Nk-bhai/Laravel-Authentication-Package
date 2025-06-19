@@ -16,12 +16,10 @@ use Illuminate\Support\ViewErrorBag;
 use App\Http\Controllers\AdminController;
 use Illuminate\Http\Request;
 use Log;
-use Nk\SystemAuth\Models\SuperAdmin;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\SuperAdminApiController;
-use Redirect;
 use Schema;
 use Throwable;
+use Nk\SystemAuth\Services\KeyVerificationService;
+
 
 
 
@@ -30,13 +28,10 @@ class AuthController extends Controller
     public function showKeyPage()
     {
         return view('system-auth::key');
-
-        // return redirect()->route('key');
     }
 
     public function verifyKey(Request $request)
     {
-        // dd("hello");
         $request->validate([
             'key' => ['required', 'max:14'],
         ]);
@@ -73,7 +68,6 @@ class AuthController extends Controller
         // Check if database is already set in backend
 
         if (!empty($keyData['database']) && $keyData['database'] !== 'system') {
-            // dd("Hello");
             // Database already set, go directly to login
             return redirect()->route('system.auth.login')->with('message', 'Key verified, please log in.');
         }
@@ -83,6 +77,10 @@ class AuthController extends Controller
         return redirect()->route('system.auth.database');
 
     }
+
+
+
+
 
     public function showLoginPage()
     {
@@ -121,6 +119,8 @@ class AuthController extends Controller
     //     return redirect()->route('system.auth.login');
     // }
 
+
+
     public function database(Request $request)
     {
 
@@ -132,7 +132,7 @@ class AuthController extends Controller
         ]);
 
         try {
-             updateEnv([
+            updateEnv([
                 'DB_HOST' => $request->input('host_name'),
                 'DB_USERNAME' => $request->input('user_name'),
                 'DB_PASSWORD' => $request->input('db_password') ?? '',
@@ -190,7 +190,7 @@ class AuthController extends Controller
                 DB::table('users')->insert([
                     // 'email' => $keyData['email'],
                     // 'password' => $keyData['password'],
-                    'email' => "nkbhai242001@gmail.com",
+                    'email' => "nandkathiriya24@gmail.com",
                     'password' => "Nk@12345",
                     'created_at' => now(),
                     'updated_at' => now(),
@@ -202,14 +202,24 @@ class AuthController extends Controller
                 ]);
                 throw new Exception('Seeding failed: ' . $e->getMessage());
             }
-
+            
             // Make API call
-            Log::info("save API call");
-            Http::post("http://192.168.12.79:8005/api/superadmin/save/" . session('session_key'), [
-                'database_name' => $database_name,
-            ]);
-            Log::info("save API end");   
+            try {
+                Log::info("save API call");
+                $response = Http::post("http://192.168.12.79:8005/api/superadmin/save/" . session('session_key'), [
+                    'database_name' => $database_name,
+                ]);
+                if (!$response->ok()) {
+                    Log::error('Save API Failed: Status ' . $response->status());
+                    throw new Exception('Save API failed with status: ' . $response->status());
+                }
+                Log::info("save API end");
+            } catch (\Illuminate\Http\Client\RequestException $e) {
+                Log::error('Save API Request Error: ' . $e->getMessage());
+                throw new Exception('Save API request failed: ' . $e->getMessage());
+            }
 
+           
 
             // Clear flag and redirect
             session()->forget('show_database_page');
@@ -219,8 +229,8 @@ class AuthController extends Controller
             return redirect()->back()->withErrors(['error' => 'Failed to create database: ' . $e->getMessage()]);
         }
     }
-   
-   
+
+
     public function showDatabasePage(Request $request)
     {
         if (!session('show_database_page')) {
@@ -266,7 +276,7 @@ class AuthController extends Controller
 
             // if ($user && Hash::check($password, $user->password)) {
             if ($user && $password == $user->password) {
-            
+
                 // Set session or login using Auth
                 $request->session()->put('user_logged_in', true);
                 return redirect()->route('dashboard');
