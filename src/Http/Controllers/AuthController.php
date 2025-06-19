@@ -45,7 +45,7 @@ class AuthController extends Controller
         $clientIp = $request->ip(); // Get user's IP
 
         // 1. Fetch key details from the API
-        $response = Http::get("http://192.168.12.143:8005/api/superadmin/{$key}");
+        $response = Http::get("http://192.168.12.79:8005/api/superadmin/{$key}");
 
         if (!$response->ok() || $response['key'] !== $key) {
             return redirect()->route('system.auth.key')->with(['error' => 'Invalid Key', 'key_value' => $key]);
@@ -62,7 +62,7 @@ class AuthController extends Controller
             return redirect()->route('system.auth.login')->with('error', 'Key already verified');
         }
         // 3. Mark as verified & store IP via API
-        Http::post("http://192.168.12.143:8005/api/superadmin/verify/{$key}", [
+        Http::post("http://192.168.12.79:8005/api/superadmin/verify/{$key}", [
             'ip_address' => $clientIp,
         ]);
 
@@ -89,95 +89,6 @@ class AuthController extends Controller
         return view('system-auth::login');
     }
 
-    // public function database(Request $request)
-    // {
-
-    //     $request->validate([
-    //         'database_name' => 'required|alpha_dash|max:20',
-    //         'host_name' => 'required|string|max:255',
-    //         'user_name' => 'required',
-    //         'db_password' => 'sometimes|nullable|string|min:2|max:32', // optional password
-    //     ]);
-
-    //     // dd($request->all());
-    //     updateEnv([
-    //         'DB_HOST' => $request->input('host_name'),
-    //         'DB_USERNAME' => $request->input('user_name'),
-    //         'DB_PASSWORD' => $request->input('db_password'),
-    //     ]);
-
-    //     $database_name = $request->input('database_name');
-    //     session(['database_name' => $database_name]);
-
-    //     Http::post("http://192.168.12.143:8005/api/superadmin/save/" . session('session_key'), [
-    //         'database_name' => $database_name,
-    //     ]);
-    //     // seeding
-    //     // Step 1: Fetch API data
-    //     // $seed_key = session('session_key');
-    //     // $response = Http::get("http://192.168.12.143:8005/api/superadmin/{$seed_key}");
-
-    //     // $keyData = $response->json();
-    //     // $seed_email = $keyData['email'];
-    //     // $seed_password = $keyData['password'];
-    //     // $seed_email = "nk@gmail.com";
-    //     // $seed_password = "Nk@12345";
-
-    //     // Step 2: Set up dynamic DB connection
-    //     $database_name = $request->input('database_name');
-    //     DB::statement('CREATE DATABASE IF NOT EXISTS ' . $database_name);
-    //     Config::set('database.connections.dynamic_db', [
-    //         'driver' => 'mysql',
-    //         'host' => $request->input('host_name'),
-    //         'port' => 3306,
-    //         'database' => $database_name,
-    //         'username' => $request->input('user_name'),
-    //         'password' => $request->input('db_password'),
-    //         'charset' => 'utf8mb4',
-    //         'collation' => 'utf8mb4_unicode_ci',
-    //         'prefix' => '',
-    //         'strict' => true,
-    //         'engine' => null,
-    //     ]);
-
-    //     // DB::purge('dynamic_db');
-    //     // DB::reconnect('dynamic_db');
-
-    //     // try {
-    //         // dd("Hi");
-    //         // dd(DB::connection('dynamic_db')->getPdo());
-    //     // } catch (\Exception $e) {
-    //     //     dd("Database connection failed: " . $e->getMessage());
-    //     // }
-
-    //     // dd(DB::connection()->getDatabaseName());
-    //     // // Run migrations on dynamic_db connection
-    //     Artisan::call('migrate', [
-    //         '--database' => 'dynamic_db',
-    //         '--path' => base_path('nk-system-auth/database/migrations'),
-    //         '--force' => true,
-    //     ]);
-    //     dd("i");
-    //     dd("Hi");
-    //     // // C:\nk-system-auth\database\migrations\create_users_table.php
-    //     // // Insert Super Admin user
-    //     // $seed_email = "nk@gmail.com";
-    //     // $seed_password = "Nk@12345";
-
-    //     // DB::connection('dynamic_db')->table('users')->insert([
-    //     //     'email' => $seed_email,
-    //     //     'password' => $seed_password,
-    //     //     // 'created_at' => now(),
-    //     //     // 'updated_at' => now(),
-    //     // ]);
-    //     // dd("Hello");
-
-
-    //     session()->forget('show_database_page');
-
-    //     return redirect()->route('system.auth.login');
-    // }
-
 
     // public function database(Request $request)
     // {
@@ -199,14 +110,14 @@ class AuthController extends Controller
     //     $database_name = $request->input('database_name');
     //     session(['database_name' => $database_name]);
 
-    //     Http::post("http://192.168.12.143:8005/api/superadmin/save/" . session('session_key'), [
+    //     Http::post("http://192.168.12.79:8005/api/superadmin/save/" . session('session_key'), [
     //         'database_name' => $database_name,
     //     ]);
     //     $database_name = $request->input('database_name');
 
 
     //     session()->forget('show_database_page');
-    //     echo "hi";exit;
+    //     // echo "hi";exit;
     //     return redirect()->route('system.auth.login');
     // }
 
@@ -221,7 +132,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            $result = updateEnv([
+             updateEnv([
                 'DB_HOST' => $request->input('host_name'),
                 'DB_USERNAME' => $request->input('user_name'),
                 'DB_PASSWORD' => $request->input('db_password') ?? '',
@@ -269,21 +180,21 @@ class AuthController extends Controller
                 throw new Exception('Migration failed: ' . $e->getMessage());
             }
 
+            log::info("seed running");
             // Run seeder
             try {
-                // $ip_address = $request->ip();
-                // $response = Http::get("http://192.168.12.143:8005/api/superadmin/get/{$ip_address}");
+                // dd(session('session_key'));
+                // $response = Http::get('http://192.168.12.79:8005/api/superadmin/' . session('session_key'));
                 // $keyData = $response->json();
-                
+
                 DB::table('users')->insert([
                     // 'email' => $keyData['email'],
                     // 'password' => $keyData['password'],
-                    'email' => "nk@gmail.com",
+                    'email' => "nkbhai242001@gmail.com",
                     'password' => "Nk@12345",
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
-                // Log::info('Seeding output');
             } catch (Throwable $e) {
                 Log::error('Seeding failed: ' . $e->getMessage(), [
                     'trace' => $e->getTraceAsString(),
@@ -293,10 +204,12 @@ class AuthController extends Controller
             }
 
             // Make API call
-            Http::post("http://192.168.12.143:8005/api/superadmin/save/" . session('session_key'), [
+            Log::info("save API call");
+            Http::post("http://192.168.12.79:8005/api/superadmin/save/" . session('session_key'), [
                 'database_name' => $database_name,
             ]);
-            
+            Log::info("save API end");   
+
 
             // Clear flag and redirect
             session()->forget('show_database_page');
@@ -306,6 +219,8 @@ class AuthController extends Controller
             return redirect()->back()->withErrors(['error' => 'Failed to create database: ' . $e->getMessage()]);
         }
     }
+   
+   
     public function showDatabasePage(Request $request)
     {
         if (!session('show_database_page')) {
@@ -332,18 +247,31 @@ class AuthController extends Controller
 
         try {
             // 1. First, check using the API
-            $response = Http::get('http://192.168.12.143:8005/api/superadmin/' . session('session_key'));
 
-            if ($response->ok()) {
-                $data = $response->json();
+            // $response = Http::get('http://192.168.12.79:8005/api/superadmin/' . session('session_key'));
 
-                if ($data && isset($data['email'], $data['password'])) {
-                    if ($data['email'] === $email && Hash::check($password, $data['password'])) {
-                        $request->session()->put('user_logged_in', true);
-                        return redirect()->route('dashboard');
-                    }
-                }
+            // if ($response->ok()) {
+            //     $data = $response->json();
+
+            //     if ($data && isset($data['email'], $data['password'])) {
+            //         if ($data['email'] === $email && Hash::check($password, $data['password'])) {
+            //             $request->session()->put('user_logged_in', true);
+            //             return redirect()->route('dashboard');
+            //         }
+            //     }
+            // }
+
+            // 1. First check in seed database
+            $user = DB::table('users')->where('email', $email)->first();
+
+            // if ($user && Hash::check($password, $user->password)) {
+            if ($user && $password == $user->password) {
+            
+                // Set session or login using Auth
+                $request->session()->put('user_logged_in', true);
+                return redirect()->route('dashboard');
             }
+
 
             // 2. If API check fails, fall back to the admin method
             $adminController = app(AdminController::class);
@@ -357,7 +285,7 @@ class AuthController extends Controller
             // 3. If both checks fail, redirect back with an error
             return redirect()->back()->with(['error' => 'Invalid email or password.', 'loginemail' => $email, 'loginpassword' => $password]);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return redirect()->back()->with('error', 'Something went wrong. Please try again.');
         }
     }

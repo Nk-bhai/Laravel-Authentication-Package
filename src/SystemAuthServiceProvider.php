@@ -23,7 +23,7 @@ class SystemAuthServiceProvider extends ServiceProvider
         $this->app['router']->aliasMiddleware('key.verified', \Nk\SystemAuth\Http\Middleware\EnsureKeyVerified::class);
         $this->app['router']->aliasMiddleware('package.present', \Nk\SystemAuth\Http\Middleware\EnsurePackagePresent::class);
 
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     public function register()
