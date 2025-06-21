@@ -1,6 +1,6 @@
 @extends('master_old')
 @section('contents')
-
+@section('title', 'Login Page')
     @if(session('message'))
         <div class="alert alert-success">{{ session('message') }}</div>
     @endif
