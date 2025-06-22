@@ -18,7 +18,7 @@ class EnsureKeyVerified
     //     // Allow access to `/key` if key is not verified
     //     if ($request->is('key') || $request->routeIs('system.auth.key')) {
     //         if ($key) {
-    //             $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
+    //             $data = Http::get('http://192.168.1.11:8005/api/superadmin/' . $key);
 
     //             if ($data->ok() && $data['verified']) {
     //                 return redirect()->route('system.auth.login')->with('message', 'Key already verified');
@@ -41,7 +41,7 @@ class EnsureKeyVerified
     //         return redirect()->route('system.auth.key')->with('error', 'Key verification required');
     //     }
 
-    //     $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
+    //     $data = Http::get('http://192.168.1.11:8005/api/superadmin/' . $key);
 
     //     if (!$data->ok() || !$data['verified']) {
     //         return redirect()->route('system.auth.key')->with('error', 'Key verification required');
@@ -80,7 +80,7 @@ class EnsureKeyVerified
         // Allow access to `/key` if key is not verified
         if ($request->is('key') || $request->routeIs('system.auth.key')) {
             if ($key) {
-                $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
+                $data = Http::get('http://192.168.1.11:8005/api/superadmin/' . $key);
 
                 if ($data->ok() && $data['verified']) {
                     return redirect()->route('system.auth.login')->with('message', 'Key already verified');
@@ -107,15 +107,16 @@ class EnsureKeyVerified
         //     return redirect()->route('system.auth.key')->with('error', 'Key verification required');
         // }
 
-        // $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
+        // $data = Http::get('http://192.168.1.11:8005/api/superadmin/' . $key);
 
         // if (!$data->ok() || !$data['verified']) {
         //     return redirect()->route('system.auth.key')->with('error', 'Key verification required');
         // }
         $clientIp = $request->ip();
-        $data = Http::get('http://192.168.12.79:8005/api/superadmin/get/' . $clientIp);
+        $data = Http::get('http://192.168.1.11:8005/api/superadmin/get/' . $clientIp);
 
         if (!$data->ok() || !$data['verified']) {
+            session()->flush();
             return redirect()->route('system.auth.key')->with('error', 'Key verification required');
         }
 

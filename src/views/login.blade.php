@@ -1,9 +1,45 @@
 @extends('master_old')
 @section('contents')
 @section('title', 'Login Page')
+    {{-- Success Popup --}}
     @if(session('message'))
-        <div class="alert alert-success">{{ session('message') }}</div>
+        <div id="sessionMessage"
+            class="d-flex align-items-center bg-light-success border border-success border-dashed rounded px-6 py-4 position-fixed top-0 start-50 translate-middle-x mt-10 shadow-lg zindex-105"
+            style="min-width: 350px; max-width: 90%; animation: fadeInDown 0.5s ease; background: linear-gradient(135deg, #e6fffa 0%, #d1fae5 100%); border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 128, 0, 0.2);">
+            <span class="svg-icon svg-icon-2tx svg-icon-success me-3">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path opacity="0.3"
+                        d="M6 21H18C19.1 21 20 20.1 20 19V5C20 3.9 19.1 3 18 3H6C4.9 3 4 3.9 4 5V19C4 20.1 4.9 21 6 21Z"
+                        fill="#047857" />
+                    <path
+                        d="M9.29 16.29L5.7 12.7C5.31 12.31 5.31 11.68 5.7 11.29C6.09 10.9 6.72 10.9 7.11 11.29L10 14.17L16.88 7.29C17.27 6.9 17.9 6.9 18.29 7.29C18.68 7.68 18.68 8.31 18.29 8.7L10.7 16.29C10.31 16.68 9.68 16.68 9.29 16.29Z"
+                        fill="#047857" />
+                </svg>
+            </span>
+            <span class="fw-bold text-success fs-6">{{ session('message') }}</span>
+            <button type="button" class="btn-close ms-auto" onclick="$('#sessionMessage').fadeOut(300)"
+                aria-label="Close"></button>
+        </div>
     @endif
+
+    {{-- Error Popup --}}
+    @if(session('error'))
+        <div id="sessionError"
+            class="d-flex align-items-center bg-light-danger border border-danger border-dashed rounded px-6 py-4 position-fixed top-0 start-50 translate-middle-x mt-10 shadow-lg zindex-105"
+            style="min-width: 350px; max-width: 90%; animation: fadeInDown 0.5s ease; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-radius: 12px; box-shadow: 0 4px 20px rgba(220, 38, 38, 0.2);">
+            <span class="svg-icon svg-icon-2tx svg-icon-danger me-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                    <path opacity="0.3" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z" fill="#b91c1c" />
+                    <path d="M13 7h-2v6h2V7zm0 8h-2v2h2v-2z" fill="#b91c1c" />
+                </svg>
+            </span>
+            <span class="fw-bold text-danger fs-6">{{ session('error') }}</span>
+            <button type="button" class="btn-close ms-auto" onclick="$('#sessionError').fadeOut(300)"
+                aria-label="Close"></button>
+        </div>
+    @endif
+
+
     <div class="d-flex flex-column flex-root ">
 
         <div class="d-flex flex-column flex-column-fluid bgi-position-y-bottom position-x-center bgi-no-repeat bgi-size-contain bgi-attachment-fixed"
@@ -33,12 +69,12 @@
                         </div>
                         <div id="password_error" style="color:red"></div>
                     </div>
-                    @if(session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
+                    {{-- @if(session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                    @endif --}}
+                    
                     <div class="text-center">
                         <button type="submit" id="kt_sign_in_submit" class="btn btn-lg btn-primary w-100 mb-5">
                             <span class="indicator-label">Log In</span>
@@ -50,6 +86,25 @@
     </div>
 
     <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            setTimeout(() => {
+                const msgBox = document.getElementById("sessionMessage");
+                const errBox = document.getElementById("sessionError");
+
+                if (msgBox) {
+                    msgBox.style.transition = "opacity 0.5s ease";
+                    msgBox.style.opacity = "0";
+                    setTimeout(() => msgBox.remove(), 600);
+                }
+
+                if (errBox) {
+                    errBox.style.transition = "opacity 0.5s ease";
+                    errBox.style.opacity = "0";
+                    setTimeout(() => errBox.remove(), 600);
+                }
+            }, 2000);
+        });
+
         // password show hide
         function Password_Show_hide() {
             var x = document.getElementById("password");
