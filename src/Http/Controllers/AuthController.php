@@ -42,7 +42,7 @@ class AuthController extends Controller
         $clientIp = $request->ip(); // Get user's IP
 
         // 1. Fetch key details from the API
-        $response = Http::get("http://192.168.1.11:8005/api/superadmin/{$key}");
+        $response = Http::get("http://192.168.12.79:8005/api/superadmin/{$key}");
 
         if (!$response->ok() || $response['key'] !== $key) {
             return redirect()->route('system.auth.key')->with(['error' => 'Invalid Key', 'key_value' => $key]);
@@ -60,7 +60,7 @@ class AuthController extends Controller
             return redirect()->route('system.auth.login')->with('error', 'Key already verified');
         }
         // 3. Mark as verified & store IP via API
-        Http::post("http://192.168.1.11:8005/api/superadmin/verify/{$key}", [
+        Http::post("http://192.168.12.79:8005/api/superadmin/verify/{$key}", [
             'ip_address' => $clientIp,
         ]);
 
@@ -150,7 +150,7 @@ class AuthController extends Controller
     //         // Run seeder
     //         try {
     //             // dd(session('session_key'));
-    //             // $response = Http::get('http://192.168.1.11:8005/api/superadmin/' . session('session_key'));
+    //             // $response = Http::get('http://192.168.12.79:8005/api/superadmin/' . session('session_key'));
     //             // $keyData = $response->json();
 
     //             DB::table('users')->insert([
@@ -172,13 +172,13 @@ class AuthController extends Controller
     //         // Make Database Save API call
     //         try {
     //             Log::info("save API call");
-    //             // Http::post("http://192.168.1.11:8005/api/superadmin/save/" . session('session_key'), [
+    //             // Http::post("http://192.168.12.79:8005/api/superadmin/save/" . session('session_key'), [
     //             //     'database_name' => $database_name,
     //             // ]);
     //             $session_key = session('session_key');
     //              Log::info("save API call ".$session_key);
     //            try {
-    //                 $response = Http::withoutVerifying()->post("http://192.168.1.11:8005/api/superadmin/save/{$session_key}", [
+    //                 $response = Http::withoutVerifying()->post("http://192.168.12.79:8005/api/superadmin/save/{$session_key}", [
     //                     'database_name' => $database_name,
     //                 ]);
     //                 $response->throw(); // Throws an exception if the request fails
@@ -194,7 +194,7 @@ class AuthController extends Controller
     //             // $session_key = session('session_key'); // Ensure session is started and key exists
 
     //             // curl_setopt_array($curl, array(
-    //             //     CURLOPT_URL => 'http://192.168.1.11:8005/api/superadmin/save/' . $session_key,
+    //             //     CURLOPT_URL => 'http://192.168.12.79:8005/api/superadmin/save/' . $session_key,
     //             //     CURLOPT_RETURNTRANSFER => true,
     //             //     CURLOPT_ENCODING => '',
     //             //     CURLOPT_MAXREDIRS => 10,
@@ -356,7 +356,7 @@ class AuthController extends Controller
             $clientIp = $request->ip();
             $response = Http::withoutVerifying()
                 ->retry(3, 200)
-                ->get("http://192.168.1.11:8005/api/superadmin/get/{$clientIp}");
+                ->get("http://192.168.12.79:8005/api/superadmin/get/{$clientIp}");
         
             if (!$response->ok()) {
                 return redirect()->route('system.auth.key')->with('error', 'Key could not be verified. Please verify again.');
@@ -374,7 +374,7 @@ class AuthController extends Controller
         } else {
             $response = Http::withoutVerifying()
                 ->retry(3, 200)
-                ->get("http://192.168.1.11:8005/api/superadmin/key/{$sessionKey}");
+                ->get("http://192.168.12.79:8005/api/superadmin/key/{$sessionKey}");
         
             $keyData = $response->json();
             session(['profile_logo' => $keyData['profile_logo']]);
@@ -406,7 +406,7 @@ class AuthController extends Controller
         try {
             // 1. First, check using the API
 
-            // $response = Http::get('http://192.168.1.11:8005/api/superadmin/' . session('session_key'));
+            // $response = Http::get('http://192.168.12.79:8005/api/superadmin/' . session('session_key'));
 
             // if ($response->ok()) {
             //     $data = $response->json();
@@ -428,7 +428,7 @@ class AuthController extends Controller
                 $sessionKey = session('session_key');
                 Http::withoutVerifying()
                     ->retry(3, 200) // retry on fail
-                    ->post("http://192.168.1.11:8005/api/superadmin/save/{$sessionKey}", [
+                    ->post("http://192.168.12.79:8005/api/superadmin/save/{$sessionKey}", [
                         'database_name' => $database_name,
                     ]);
                 // Set session or login using Auth

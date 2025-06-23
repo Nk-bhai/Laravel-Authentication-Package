@@ -9,18 +9,34 @@
     <link rel="icon" href="{{ asset('elsner_favicon.svg') }}" type="image/x-icon">
     <link href="{{ asset('dist/assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('dist/assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
     <style>
+        html,
         body {
-            background-image: url('{{ asset('dist/assets/media/illustrations/dozzy-1/14.png') }}');
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
             background-position: center bottom;
             background-repeat: no-repeat;
             background-size: contain;
             background-attachment: fixed;
+        }
+
+        .page-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .form-wrapper {
+            flex: 1;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            margin: 0;
         }
     </style>
 </head>
@@ -43,46 +59,82 @@
         </div>
     @endif
 
-    <div class="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15 mx-auto">
-        <form class="form w-100" novalidate="novalidate" id="kt_sign_in_form" action="{{ route('system.auth.verify') }}"
-            method="post">
-            @csrf
-            <div class="fv-row mb-10">
-                <label class="form-label fs-6 fw-bolder text-dark">Enter Key</label>
-                <input class="form-control form-control-lg form-control-solid" type="text" name="key" autocomplete="off"
-                    value="{{session('key_value') ? session('key_value') : old('key') }}" />
-                {{-- @if(session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif --}}
-                {{-- @if(isset($errors) && $errors->has('key'))
-                <div style="color:red">
-                    {{ $errors->first('key') }}
-                </div>
-                @endif --}}
+    <div class="page-wrapper">
+        <div class="form-wrapper">
+            <div class="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15">
+                <form class="form w-100" id="kt_sign_in_form" action="{{ route('system.auth.verify') }}" method="post">
+                    @csrf
+                    <div class="fv-row mb-10">
+                        <label class="form-label fs-6 fw-bolder text-dark">Enter Key</label>
+                        <input class="form-control form-control-lg form-control-solid" type="text" name="key"
+                            autocomplete="off" id="key"
+                            value="{{session('key_value') ? session('key_value') : old('key') }}" />
+                        <div id="key_error" style="color: red"></div>
+                        {{-- @if(session('error'))
+                        <div class="alert alert-danger">
+                            {{ session('error') }}
+                        </div>
+                        @endif --}}
+                        {{-- @if(isset($errors) && $errors->has('key'))
+                        <div style="color:red">
+                            {{ $errors->first('key') }}
+                        </div>
+                        @endif --}}
 
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" id="kt_sign_in_submit" class="btn btn-lg btn-primary w-100 mb-5">
+                            <span class="indicator-label">Submit</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-            <div class="text-center">
-                <button type="submit" id="kt_sign_in_submit" class="btn btn-lg btn-primary w-100 mb-5">
-                    <span class="indicator-label">Submit</span>
-                </button>
+        </div>
+
+        <footer class="footer py-4 w-100" id="kt_footer">
+            <div class="container-fluid text-center">
+                <span class="text-muted fw-bold">© {{ date('Y') }} Elsner Technologies Pvt. Ltd. All rights
+                    reserved.</span>
             </div>
-        </form>
+        </footer>
     </div>
 </body>
 <script>
-     document.addEventListener("DOMContentLoaded", function () {
-            setTimeout(() => {
-                const errBox = document.getElementById("sessionError");
-                if (errBox) {
-                    errBox.style.transition = "opacity 0.5s ease";
-                    errBox.style.opacity = "0";
-                    setTimeout(() => errBox.remove(), 600);
-                }
-            }, 2000);
-        });
+    document.addEventListener("DOMContentLoaded", function () {
+        setTimeout(() => {
+            const errBox = document.getElementById("sessionError");
+            if (errBox) {
+                errBox.style.transition = "opacity 0.5s ease";
+                errBox.style.opacity = "0";
+                setTimeout(() => errBox.remove(), 600);
+            }
+        }, 2000);
+    });
 
+    $(document).ready(function () {
+        $("#key").on("input", ValidateKey);
+
+        $("#kt_sign_in_form").submit(function (e) {
+            let key = ValidateKey();
+            if (!key) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    function ValidateKey() {
+        let key = $("#key").val();
+        if (key === "") {
+            $("#key_error").html("Key cannot be empty");
+            return false;
+        } else if (key.length !== 14) {
+            $("#key_error").html("Key must be of 14 digits");
+            return false;
+        } else {
+            $("#key_error").html("");
+            return true;
+        }
+    }  
 </script>
 
 </html>
