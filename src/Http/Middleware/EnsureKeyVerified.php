@@ -101,17 +101,6 @@ class EnsureKeyVerified
             }
         }
 
-        // Key must be set and verified to proceed
-        // if (!$key) {
-        //     dd("hello");
-        //     return redirect()->route('system.auth.key')->with('error', 'Key verification required');
-        // }
-
-        // $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
-
-        // if (!$data->ok() || !$data['verified']) {
-        //     return redirect()->route('system.auth.key')->with('error', 'Key verification required');
-        // }
         $clientIp = $request->ip();
         $data = Http::get('http://192.168.12.79:8005/api/superadmin/get/' . $clientIp);
 

@@ -19,6 +19,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Request;
 use Log;
 use Schema;
+use Str;
 use Throwable;
 use Nk\SystemAuth\Services\KeyVerificationService;
 
@@ -27,6 +28,53 @@ use Nk\SystemAuth\Services\KeyVerificationService;
 
 class AuthController extends Controller
 {
+
+
+    public function showPurchaseCodePage()
+    {
+        return view('system-auth::purchaseCode');
+    }
+
+    public function PurchaseCode(Request $request)
+    {
+        $purchase_code = $request->input('purchase_code');
+        
+        $response = Http::withToken('LjILXgU18qFsOG3pqtFDMKvcyRVGtP64')->get('https://api.envato.com/v3/market/author/sale?code=' .$purchase_code);
+        if(!$response->ok()){
+            // dd("hello");
+        Http::post("http://192.168.12.79:8005/api/superadmin/purchase_code_verify/{$purchase_code}",[
+            'purchase_code' => $purchase_code,
+            'key' => $this->generateFormattedNumber(),
+            'email' => $this->generateRandomEmail(),
+        ]);
+
+        }else{
+            dd("Not valid");
+
+        }
+
+        $formatted = $this->generateFormattedNumber();
+        $email= $this->generateRandomEmail();
+
+        session(['email' => $email]);
+        session(['key' => $formatted]);
+        return redirect()->route('system.auth.key');
+    }
+    protected function generateFormattedNumber()
+    {
+        // Generate a 12-digit number as a string, padded with zeros if necessary
+        $number = str_pad(mt_rand(0, 999999999999), 12, '0', STR_PAD_LEFT);
+
+        // Split into chunks of 4 and join with dashes
+        return implode('-', str_split($number, 4));
+    }
+
+    function generateRandomEmail($domain = 'example.com') {
+    $randomName = Str::random(10);
+    return strtolower($randomName . '@' . $domain);
+}
+
+
     public function showKeyPage()
     {
         return view('system-auth::key');
@@ -39,6 +87,7 @@ class AuthController extends Controller
         ]);
 
         $key = $request->input('key');
+
         $clientIp = $request->ip(); // Get user's IP
 
         // 1. Fetch key details from the API
@@ -199,29 +248,29 @@ class AuthController extends Controller
             $response = Http::withoutVerifying()
                 ->retry(3, 200)
                 ->get("http://192.168.12.79:8005/api/superadmin/get/{$clientIp}");
-        
+
             if (!$response->ok()) {
                 return redirect()->route('system.auth.key')->with('error', 'Key could not be verified. Please verify again.');
             }
-        
+
             $keyData = $response->json();
             $sessionKey = $keyData['key'] ?? null;
             session(['profile_logo' => $keyData['profile_logo']]);
-        
+
             if (!$sessionKey) {
                 return redirect()->route('system.auth.key')->with('error', 'Key data not found.');
             }
-        
+
             session(['session_key' => $sessionKey]); // Re-store it in session
         } else {
             $response = Http::withoutVerifying()
                 ->retry(3, 200)
                 ->get("http://192.168.12.79:8005/api/superadmin/key/{$sessionKey}");
-        
+
             $keyData = $response->json();
             session(['profile_logo' => $keyData['profile_logo']]);
         }
-        
+
         $keyData = $response->json();
         // dd($keyData);
         if ($keyData['database'] == "system") {

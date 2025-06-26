@@ -6,8 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta charset="utf-8" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700" />
+
     <link rel="icon" href="{{ asset('elsner_favicon.svg') }}" type="image/x-icon">
     <link href="{{ asset('dist/assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+        integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="{{ asset('dist/assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
@@ -38,10 +42,115 @@
             justify-content: center;
             align-items: center;
         }
+
+        .modal-header {
+            padding: 0.5rem 1rem;
+            /* reduce top/bottom padding */
+            min-height: auto;
+            /* remove minimum height */
+        }
+
+        .modal-header .modal-title {
+            margin-bottom: 0;
+            /* remove bottom margin */
+            font-weight: 600;
+            /* keep it semi-bold */
+            font-size: 1.25rem;
+            /* adjust size if you want */
+            line-height: 1.2;
+            padding-top: 0.2rem;
+            /* small padding for alignment */
+            padding-bottom: 0.2rem;
+        }
     </style>
 </head>
 
 <body>
+
+   
+    {{-- key and email popup for copy --}}
+    @if(session('key'))
+        <div class="modal fade" id="sessionInfoModal" tabindex="-1" aria-labelledby="sessionInfoModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-top-centered">
+                <div class="modal-content border border-primary">
+                    <div class="modal-header bg-light-primary">
+                        <p class="modal-title text-primary" id="sessionInfoModalLabel">Info</p>
+                        <button type="button" class="btn btn-sm btn-icon btn-active-light-primary" data-bs-dismiss="modal"
+                            aria-label="Close">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body d-flex align-items-center gap-3">
+                        <span>Key : </span>
+                        <span id="sessionKeyText" class="text-gray-700 fw-semibold fs-6 flex-grow-1"> 
+                            <strong>{{ session('key') }}</strong></span>
+
+                        {{-- Copy Button --}}
+                        <button id="copyBtn" type="button" class="btn btn-icon btn-sm btn-light-primary"
+                            onclick="copySessionKey()" title="Copy">
+                            <span id="copyIcon"><i class="fa-solid fa-copy"></i></span>
+                        </button>
+                    </div>
+                    {{-- email --}}
+                    <div class="modal-body d-flex align-items-center gap-3">
+                        <span>Email : </span>
+                        <span id="sessionEmailText" class="text-gray-700 fw-semibold fs-6 flex-grow-1"> 
+                            <strong>{{ session('email') }}</strong></span>
+
+                        {{-- Copy Button --}}
+                        <button id="copyBtn" type="button" class="btn btn-icon btn-sm btn-light-primary"
+                            onclick="copySessionEmail()" title="Copy">
+                            <span id="copyIcon"><i class="fa-solid fa-copy"></i></span>
+                        </button>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-end">
+                        <button type="button" class="btn btn-sm btn-light-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function copySessionKey() {
+                const text = document.getElementById('sessionKeyText').innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
+                    setTimeout(() => {
+                        document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-copy"></i>';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                });
+            }
+            function copySessionEmail() {
+                const text = document.getElementById('sessionEmailText').innerText;
+                navigator.clipboard.writeText(text).then(() => {
+                    document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
+                    setTimeout(() => {
+                        document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-copy"></i>';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Copy failed:', err);
+                });
+            }
+
+            // Auto-show modal when session message exists
+            document.addEventListener('DOMContentLoaded', function () {
+                const sessionModal = document.getElementById('sessionInfoModal');
+                if (sessionModal && typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    const modalInstance = new bootstrap.Modal(sessionModal);
+                    modalInstance.show();
+                }
+            });
+        </script>
+    @endif
+
+
+
+
+
+
     {{-- Error Popup --}}
     @if(session('error'))
         <div id="sessionError"
@@ -99,6 +208,25 @@
         </footer>
     </div>
 </body>
+<script>var hostUrl = "assets/";</script>
+<!--begin::Javascript-->
+<!-- Global Metronic JS Bundle -->
+<script src="{{ asset('dist/assets/plugins/global/plugins.bundle.js') }}"></script>
+<script src="{{ asset('dist/assets/js/scripts.bundle.js') }}"></script>
+
+<!--  DataTables (AFTER jQuery from Metronic) -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+
+<!--end::Global Javascript Bundle-->
+<!--begin::Page Vendors Javascript(used by this page)-->
+<script src="{{ asset('dist/assets/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
+<!--end::Page Vendors Javascript-->
+<!--begin::Page Custom Javascript(used by this page)-->
+<script src="{{ asset('dist/assets/js/custom/widgets.js') }}"></script>
+<script src="{{ asset('dist/assets/js/custom/apps/chat/chat.js') }}"></script>
+<script src="{{ asset('dist/assets/js/custom/modals/create-app.js') }}"></script>
+<script src="{{ asset('dist/assets/js/custom/modals/upgrade-plan.js') }}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         setTimeout(() => {
