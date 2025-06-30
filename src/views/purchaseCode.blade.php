@@ -43,7 +43,7 @@
 
 <body>
     {{-- Error Popup --}}
-    @if(session('error'))
+    @if($errors->has('purchase_code'))
         <div id="sessionError"
             class="d-flex align-items-center bg-light-danger border border-danger border-dashed rounded px-6 py-4 position-fixed top-0 start-50 translate-middle-x mt-10 shadow-lg zindex-105"
             style="min-width: 350px; max-width: 90%; animation: fadeInDown 0.5s ease; background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); border-radius: 12px; box-shadow: 0 4px 20px rgba(220, 38, 38, 0.2);">
@@ -53,7 +53,7 @@
                     <path d="M13 7h-2v6h2V7zm0 8h-2v2h2v-2z" fill="#b91c1c" />
                 </svg>
             </span>
-            <span class="fw-bold text-danger fs-6">{{ session('error') }}</span>
+            <span class="fw-bold text-danger fs-6">{{ $errors->first('purchase_code') }}</span>
             <button type="button" class="btn-close ms-auto" onclick="$('#sessionError').fadeOut(300)"
                 aria-label="Close"></button>
         </div>

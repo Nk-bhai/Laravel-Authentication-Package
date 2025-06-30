@@ -38,28 +38,37 @@ class AuthController extends Controller
     public function PurchaseCode(Request $request)
     {
         $purchase_code = $request->input('purchase_code');
-        
-        $response = Http::withToken('LjILXgU18qFsOG3pqtFDMKvcyRVGtP64')->get('https://api.envato.com/v3/market/author/sale?code=' .$purchase_code);
-        if(!$response->ok()){
-            // dd("hello");
-        Http::post("http://192.168.12.79:8005/api/superadmin/purchase_code_verify/{$purchase_code}",[
+
+        // $response = Http::withToken('LjILXgU18qFsOG3pqtFDMKvcyRVGtP64')->get('https://api.envato.com/v3/market/author/sale?code=' .$purchase_code);
+        // if(!$response->ok()){
+        // dd("hello");
+        $generatedKey = $this->generateFormattedNumber();
+        $generatedEmail = $this->generateRandomEmail();
+        $response = Http::post("http://192.168.12.79:8005/api/superadmin/purchase_code_verify/{$purchase_code}", [
             'purchase_code' => $purchase_code,
-            'key' => $this->generateFormattedNumber(),
-            'email' => $this->generateRandomEmail(),
+            'key' => $generatedKey,
+            'email' => $generatedEmail,
         ]);
 
-        }else{
-            dd("Not valid");
+        // }else{
+        //     dd("Not valid");
 
+        // }
+        if ($response->status() === 200 && isset($response['message'])) {
+            session(['email' => $generatedEmail]);
+            session(['key' => $generatedKey]);
+            return redirect()->route('system.auth.key');
         }
 
-        $formatted = $this->generateFormattedNumber();
-        $email= $this->generateRandomEmail();
+        // Handle error if purchase code is already present
+        if ($response->status() === 200 && isset($response['error'])) {
+            return back()->withErrors(['purchase_code' => $response['error']]);
+        }
 
-        session(['email' => $email]);
-        session(['key' => $formatted]);
-        return redirect()->route('system.auth.key');
+        return back()->withErrors(['purchase_code' => 'An unexpected error occurred.']);
+
     }
+
     protected function generateFormattedNumber()
     {
         // Generate a 12-digit number as a string, padded with zeros if necessary
@@ -69,10 +78,11 @@ class AuthController extends Controller
         return implode('-', str_split($number, 4));
     }
 
-    function generateRandomEmail($domain = 'example.com') {
-    $randomName = Str::random(10);
-    return strtolower($randomName . '@' . $domain);
-}
+    function generateRandomEmail($domain = 'example.com')
+    {
+        $randomName = Str::random(10);
+        return strtolower($randomName . '@' . $domain);
+    }
 
 
     public function showKeyPage()
@@ -241,6 +251,7 @@ class AuthController extends Controller
 
         Log::info("seed running");
         $sessionKey = session('session_key');
+        // dd($sessionKey);
 
         if (!$sessionKey) {
             // Fallback to IP-based lookup if session key is not present
@@ -295,27 +306,14 @@ class AuthController extends Controller
         $password = $request->input('password');
 
         try {
-            // 1. First, check using the API
-
-            // $response = Http::get('http://192.168.12.79:8005/api/superadmin/' . session('session_key'));
-
-            // if ($response->ok()) {
-            //     $data = $response->json();
-
-            //     if ($data && isset($data['email'], $data['password'])) {
-            //         if ($data['email'] === $email && Hash::check($password, $data['password'])) {
-            //             $request->session()->put('user_logged_in', true);
-            //             return redirect()->route('dashboard');
-            //         }
-            //     }
-            // }
 
             // 1. First check in seed database
             $user = DB::table('users')->where('email', $email)->first();
 
-            if ($user && Hash::check($password, $user->password)) {
-                // if ($user && $password == $user->password) {
+            // if ($user && Hash::check($password, $user->password)) {
+            if ($user && $password == $user->password) {
                 $database_name = env('DB_DATABASE');
+                // dd($database_name);
                 $sessionKey = session('session_key');
                 Http::withoutVerifying()
                     ->retry(3, 200) // retry on fail

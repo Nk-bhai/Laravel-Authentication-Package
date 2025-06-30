@@ -67,14 +67,7 @@ class EnsureKeyVerified
 
     public function handle(Request $request, Closure $next): Response
     {
-        
-        $sessionData = session()->all();
-
-        // Option 2: Using request object (equivalent)
-        // $sessionData = $request->session()->all();
-
-        // Print to log (recommended)
-        Log::info('Session Data:', $sessionData);
+     
         $key = session('session_key');
         
         // Allow access to `/key` if key is not verified
@@ -105,6 +98,7 @@ class EnsureKeyVerified
         $data = Http::get('http://192.168.12.79:8005/api/superadmin/get/' . $clientIp);
 
         if (!$data->ok() || !$data['verified']) {
+            // dd("hello");
             session()->flush();
             return redirect()->route('system.auth.key')->with('error', 'Key verification required');
         }
