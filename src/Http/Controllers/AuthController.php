@@ -32,6 +32,7 @@ class AuthController extends Controller
 
     public function showPurchaseCodePage()
     {
+
         return view('system-auth::purchaseCode');
     }
 
@@ -57,6 +58,8 @@ class AuthController extends Controller
         if ($response->status() === 200 && isset($response['message'])) {
             session(['email' => $generatedEmail]);
             session(['key' => $generatedKey]);
+            session(['purchase_code' => $purchase_code]);
+
             return redirect()->route('system.auth.key');
         }
 
@@ -87,6 +90,7 @@ class AuthController extends Controller
 
     public function showKeyPage()
     {
+       
         return view('system-auth::key');
     }
 
@@ -273,6 +277,7 @@ class AuthController extends Controller
             }
 
             session(['session_key' => $sessionKey]); // Re-store it in session
+            // session(['purchase_code' => $keyData['purchase_code_verified']]); // Re-store it in session
         } else {
             $response = Http::withoutVerifying()
                 ->retry(3, 200)
