@@ -44,38 +44,41 @@
     <div class="d-flex flex-center flex-column flex-grow-1 py-10 px-5">
         <div class="d-flex flex-center w-100 p-10">
             <div class="card w-md-450px shadow-sm bg-body rounded p-7 p-lg-15">
-                <form class="form w-100" action="{{ route('system.auth.login.post') }}" method="POST" id="loginform">
-                    @csrf
-                    <div class="text-center mb-10">
-                        <h1 class="text-dark mb-3">Login Page</h1>
-                    </div>
-
-                    <div class="fv-row mb-10">
-                        <label class="form-label fs-6 fw-bolder text-dark">Email</label>
-                        <input class="form-control form-control-lg form-control-solid" type="email" name="email" id="email"
-                            value="{{ session('loginemail') }}" />
-                        <div id="email_error" class="text-danger fs-7 mt-1"></div>
-                    </div>
-
-                    <div class="fv-row mb-10">
-                        <label class="form-label fs-6 fw-bolder text-dark">Password</label>
-                        <div class="password-wrapper position-relative">
-                            <input class="form-control form-control-lg form-control-solid" type="password" name="password"
-                                id="password" autocomplete="off" value="{{ session('loginpassword') }}" />
-                            <span class="password-toggle-icon position-absolute top-50 end-0 translate-middle-y me-3"
-                                onclick="Password_Show_hide()" style="cursor: pointer;">
-                                <i class="fas fa-eye"></i>
-                            </span>
+                {{-- <form class="form w-100" action="{{ route('system.auth.login.post') }}" method="POST" id="loginform">
+                    --}}
+                    <form class="form w-100" id="loginform">
+                        @csrf
+                        <div class="text-center mb-10">
+                            <h1 class="text-dark mb-3">Login Page</h1>
                         </div>
-                        <div id="password_error" class="text-danger fs-7 mt-1"></div>
-                    </div>
 
-                    <div class="text-center">
-                        <button type="submit" id="kt_sign_in_submit" class="btn btn-lg btn-primary w-100 mb-5">
-                            <span class="indicator-label">Log In</span>
-                        </button>
-                    </div>
-                </form>
+                        <div class="fv-row mb-10">
+                            <label class="form-label fs-6 fw-bolder text-dark">Email</label>
+                            <input class="form-control form-control-lg form-control-solid" type="email" name="email"
+                                id="email" value="{{ session('loginemail') }}" />
+                            <div id="email_error" class="text-danger fs-7 mt-1"></div>
+                        </div>
+
+                        <div class="fv-row mb-10">
+                            <label class="form-label fs-6 fw-bolder text-dark">Password</label>
+                            <div class="password-wrapper position-relative">
+                                <input class="form-control form-control-lg form-control-solid" type="password"
+                                    name="password" id="password" autocomplete="off"
+                                    value="{{ session('loginpassword') }}" />
+                                <span class="password-toggle-icon position-absolute top-50 end-0 translate-middle-y me-3"
+                                    onclick="Password_Show_hide()" style="cursor: pointer;">
+                                    <i class="fas fa-eye"></i>
+                                </span>
+                            </div>
+                            <div id="password_error" class="text-danger fs-7 mt-1"></div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" id="kt_sign_in_submit" class="btn btn-lg btn-primary w-100 mb-5">
+                                <span class="indicator-label">Log In</span>
+                            </button>
+                        </div>
+                    </form>
             </div>
         </div>
     </div>
@@ -114,6 +117,61 @@
         }
 
         $(document).ready(function () {
+            $("#loginform").submit(function (e) {
+                e.preventDefault();
+
+                let emailValid = ValidateEmail();
+                let passwordValid = ValidatePassword();
+                if (!emailValid || !passwordValid) return;
+
+                let formData = {
+                    email: $("#email").val(),
+                    password: $("#password").val(),
+                    _token: '{{ csrf_token() }}'
+                };
+
+                $("#kt_sign_in_submit").prop("disabled", true).text("Logging in...");
+
+                $.ajax({
+                    type: "POST",
+                    url: "{{ route('system.auth.login.post') }}",
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            window.location.href = response.redirect_to;
+                        } else {
+                            showError(response.message || "Login failed.");
+                        }
+                    },
+                    error: function (xhr) {
+                        let errorMsg = "Login failed. Please try again.";
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        }
+                        showError(errorMsg);
+                    },
+                    complete: function () {
+                        $("#kt_sign_in_submit").prop("disabled", false).text("Log In");
+                    }
+                });
+            });
+
+            function showError(msg) {
+                let errorHtml = `
+            <div id="sessionError"
+                class="d-flex align-items-center bg-light-danger border border-danger border-dashed rounded px-6 py-4 position-fixed start-50 translate-middle-x mt-20 shadow-lg"
+                style="min-width: 350px; max-width: 90%; z-index: 9999;">
+                <span class="svg-icon svg-icon-2tx svg-icon-danger me-3">
+                    <i class="fas fa-exclamation-circle text-danger fs-2x"></i>
+                </span>
+                <span class="fw-bold text-danger fs-6">${msg}</span>
+                <button type="button" class="btn-close ms-auto" onclick="$('#sessionError').fadeOut(300)" aria-label="Close"></button>
+            </div>
+        `;
+                $("body").append(errorHtml);
+                setTimeout(() => $("#sessionError").fadeOut(300, function () { $(this).remove(); }), 3000);
+            }
+
             $("#email").on("input", ValidateEmail);
             $("#password").on("input", ValidatePassword);
 

@@ -47,10 +47,10 @@ class AuthController extends Controller
         if ($response->ok() && !empty($response['purchase_code_verified']) && $response['purchase_code_verified'] == 1) {
             return redirect()->route('system.auth.key')->with('message', 'Purchase code already verified');
         }
-        
+
         $purchase_code = $request->input('purchase_code');
 
-        // $response = Http::withToken('LjILXgU18qFsOG3pqtFDMKvcyRVGtP64')->get('https://api.envato.com/v3/market/author/sale?code=' .$purchase_code);
+        // $response = Http::withToken('')->get('https://api.envato.com/v3/market/author/sale?code=' .$purchase_code);
         // if(!$response->ok()){
         // dd("hello");
         $generatedKey = $this->generateFormattedNumber();
@@ -258,111 +258,223 @@ class AuthController extends Controller
     }
 
 
+    // public function login(Request $request)
+    // {
+    //     // Validate the input
+    //     $request->validate([
+    //         'email' => ['required', 'email'],
+    //         'password' => ['required'],
+    //     ]);
+
+    //     Log::info("seed running");
+    //     $sessionKey = session('session_key');
+    //     // dd($sessionKey);
+
+    //     if (!$sessionKey) {
+    //         // Fallback to IP-based lookup if session key is not present
+    //         $clientIp = $request->ip();
+    //         $response = Http::withoutVerifying()
+    //             ->retry(3, 200)
+    //             ->get("http://192.168.12.79:8005/api/superadmin/get/{$clientIp}");
+
+    //         if (!$response->ok()) {
+    //             return redirect()->route('system.auth.key')->with('error', 'Key could not be verified. Please verify again.');
+    //         }
+
+    //         $keyData = $response->json();
+    //         $sessionKey = $keyData['key'] ?? null;
+    //         session(['profile_logo' => $keyData['profile_logo']]);
+
+    //         if (!$sessionKey) {
+    //             return redirect()->route('system.auth.key')->with('error', 'Key data not found.');
+    //         }
+
+    //         session(['session_key' => $sessionKey]); // Re-store it in session
+    //         session(['purchase_code' => $keyData['purchase_code']]); // Re-store it in session
+    //     } else {
+    //         $response = Http::withoutVerifying()
+    //             ->retry(3, 200)
+    //             ->get("http://192.168.12.79:8005/api/superadmin/key/{$sessionKey}");
+
+    //         $keyData = $response->json();
+    //         session(['profile_logo' => $keyData['profile_logo']]);
+    //         session(['purchase_code' => $keyData['purchase_code']]);
+    //     }
+
+    //     $keyData = $response->json();
+    //     // dd($keyData);
+    //     if ($keyData['database'] == "system") {
+    //         try {
+    //             DB::table('users')->insert([
+    //                 'email' => $keyData['email'],
+    //                 'password' => $keyData['password'],
+    //                 'created_at' => now(),
+    //                 'updated_at' => now(),
+    //             ]);
+    //             Log::info("User seeded ");
+    //         } catch (Throwable $e) {
+    //             Log::error('Seeding failed: ' . $e->getMessage(), [
+    //                 'trace' => $e->getTraceAsString(),
+    //                 'code' => $e->getCode(),
+    //             ]);
+    //             throw new Exception('Seeding failed: ' . $e->getMessage());
+    //         }
+    //     }
+    //     // sleep(0.9);
+    //     $email = $request->input('email');
+    //     $password = $request->input('password');
+
+    //     try {
+
+    //         // 1. First check in seed database
+    //         $user = DB::table('users')->where('email', $email)->first();
+
+    //         // if ($user && Hash::check($password, $user->password)) {
+    //         if ($user && $password == $user->password) {
+    //             $database_name = env('DB_DATABASE');
+    //             // dd($database_name);
+    //             $sessionKey = session('session_key');
+    //             Http::withoutVerifying()
+    //                 ->retry(3, 200) // retry on fail
+    //                 ->post("http://192.168.12.79:8005/api/superadmin/save/{$sessionKey}", [
+    //                     'database_name' => $database_name,
+    //                 ]);
+    //             // Set session or login using Auth
+    //             $request->session()->put('user_logged_in', true);
+
+
+    //             return redirect()->route('dashboard');
+    //         }
+
+
+    //         // 2. If API check fails, fall back to the admin method
+    //         $adminController = app(AdminController::class);
+    //         $adminAuthenticated = $adminController->admin($request);
+
+    //         if ($adminAuthenticated) {
+    //             $request->session()->put('user_logged_in', true);
+    //             return redirect()->route('UserTable'); // Redirect to UserTable if admin method authenticates
+    //         }
+
+    //         // 3. If both checks fail, redirect back with an error
+    //         return redirect()->back()->with(['error' => 'Invalid email or password.', 'loginemail' => $email, 'loginpassword' => $password]);
+
+    //     } catch (Exception $e) {
+    //         Log::error("Database setup failed: " . $e->getMessage());
+    //         return redirect()->back()->with('error', 'Something went wrong. Please try again.');
+    //     }
+    // }
+
+
+
     public function login(Request $request)
-    {
-        // Validate the input
-        $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
-        ]);
+{
+    $request->validate([
+        'email' => ['required', 'email'],
+        'password' => ['required'],
+    ]);
 
-        Log::info("seed running");
-        $sessionKey = session('session_key');
-        // dd($sessionKey);
+    Log::info("seed running");
+    $sessionKey = session('session_key');
 
-        if (!$sessionKey) {
-            // Fallback to IP-based lookup if session key is not present
-            $clientIp = $request->ip();
-            $response = Http::withoutVerifying()
-                ->retry(3, 200)
-                ->get("http://192.168.12.79:8005/api/superadmin/get/{$clientIp}");
+    if (!$sessionKey) {
+        $clientIp = $request->ip();
+        $response = Http::withoutVerifying()->retry(3, 200)
+            ->get("http://192.168.12.79:8005/api/superadmin/get/{$clientIp}");
 
-            if (!$response->ok()) {
-                return redirect()->route('system.auth.key')->with('error', 'Key could not be verified. Please verify again.');
-            }
-
-            $keyData = $response->json();
-            $sessionKey = $keyData['key'] ?? null;
-            session(['profile_logo' => $keyData['profile_logo']]);
-
-            if (!$sessionKey) {
-                return redirect()->route('system.auth.key')->with('error', 'Key data not found.');
-            }
-
-            session(['session_key' => $sessionKey]); // Re-store it in session
-            session(['purchase_code' => $keyData['purchase_code']]); // Re-store it in session
-        } else {
-            $response = Http::withoutVerifying()
-                ->retry(3, 200)
-                ->get("http://192.168.12.79:8005/api/superadmin/key/{$sessionKey}");
-
-            $keyData = $response->json();
-            session(['profile_logo' => $keyData['profile_logo']]);
-            session(['purchase_code' => $keyData['purchase_code']]);
+        if (!$response->ok()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Key could not be verified. Please verify again.'
+            ], 403);
         }
 
         $keyData = $response->json();
-        // dd($keyData);
-        if ($keyData['database'] == "system") {
-            try {
-                DB::table('users')->insert([
-                    'email' => $keyData['email'],
-                    'password' => $keyData['password'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
-                Log::info("User seeded ");
-            } catch (Throwable $e) {
-                Log::error('Seeding failed: ' . $e->getMessage(), [
-                    'trace' => $e->getTraceAsString(),
-                    'code' => $e->getCode(),
-                ]);
-                throw new Exception('Seeding failed: ' . $e->getMessage());
-            }
+        $sessionKey = $keyData['key'] ?? null;
+        session(['profile_logo' => $keyData['profile_logo']]);
+
+        if (!$sessionKey) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Key data not found.'
+            ], 403);
         }
-        // sleep(0.9);
-        $email = $request->input('email');
-        $password = $request->input('password');
 
+        session([
+            'session_key' => $sessionKey,
+            'purchase_code' => $keyData['purchase_code']
+        ]);
+    } else {
+        $response = Http::withoutVerifying()->retry(3, 200)
+            ->get("http://192.168.12.79:8005/api/superadmin/key/{$sessionKey}");
+
+        $keyData = $response->json();
+        session([
+            'profile_logo' => $keyData['profile_logo'],
+            'purchase_code' => $keyData['purchase_code']
+        ]);
+    }
+
+    $keyData = $response->json();
+    if ($keyData['database'] == "system") {
         try {
-
-            // 1. First check in seed database
-            $user = DB::table('users')->where('email', $email)->first();
-
-            // if ($user && Hash::check($password, $user->password)) {
-            if ($user && $password == $user->password) {
-                $database_name = env('DB_DATABASE');
-                // dd($database_name);
-                $sessionKey = session('session_key');
-                Http::withoutVerifying()
-                    ->retry(3, 200) // retry on fail
-                    ->post("http://192.168.12.79:8005/api/superadmin/save/{$sessionKey}", [
-                        'database_name' => $database_name,
-                    ]);
-                // Set session or login using Auth
-                $request->session()->put('user_logged_in', true);
-
-
-                return redirect()->route('dashboard');
-            }
-
-
-            // 2. If API check fails, fall back to the admin method
-            $adminController = app(AdminController::class);
-            $adminAuthenticated = $adminController->admin($request);
-
-            if ($adminAuthenticated) {
-                $request->session()->put('user_logged_in', true);
-                return redirect()->route('UserTable'); // Redirect to UserTable if admin method authenticates
-            }
-
-            // 3. If both checks fail, redirect back with an error
-            return redirect()->back()->with(['error' => 'Invalid email or password.', 'loginemail' => $email, 'loginpassword' => $password]);
-
-        } catch (Exception $e) {
-            Log::error("Database setup failed: " . $e->getMessage());
-            return redirect()->back()->with('error', 'Something went wrong. Please try again.');
+            DB::table('users')->insert([
+                'email' => $keyData['email'],
+                'password' => $keyData['password'],
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+            Log::info("User seeded ");
+        } catch (Throwable $e) {
+            Log::error('Seeding failed: ' . $e->getMessage());
         }
     }
+
+    $email = $request->input('email');
+    $password = $request->input('password');
+
+    try {
+        $user = DB::table('users')->where('email', $email)->first();
+
+        if ($user && $password == $user->password) {
+            $database_name = env('DB_DATABASE');
+            Http::withoutVerifying()->retry(3, 200)
+                ->post("http://192.168.12.79:8005/api/superadmin/save/{$sessionKey}", [
+                    'database_name' => $database_name,
+                ]);
+
+            $request->session()->put('user_logged_in', true);
+
+
+            return response()->json([
+                'success' => true,
+                'redirect_to' => route('dashboard')
+            ]);
+        }
+
+        $adminController = app(AdminController::class);
+        $adminAuthenticated = $adminController->admin($request);
+
+        if ($adminAuthenticated) {
+            $request->session()->put('user_logged_in', true);
+            return response()->json([
+                'success' => true,
+                'redirect_to' => route('UserTable')
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'Invalid email or password.'
+        ], 401);
+
+    } catch (Exception $e) {
+        Log::error("Login failed: " . $e->getMessage());
+        return response()->json([
+            'success' => false,
+            'message' => 'Something went wrong. Please try again.'
+        ], 500);
+    }
+}
 
 }
