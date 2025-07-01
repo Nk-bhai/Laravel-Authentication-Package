@@ -77,12 +77,7 @@
     @endif
 
     <div class="page-wrapper">
-        <pre>
-            <?php print_r(session()->all());
-            
-            
-            ?>
-        </pre>  
+         
         <div class="form-wrapper">
             <div class="w-lg-500px bg-body rounded shadow-sm p-10 p-lg-15">
                 <form class="form w-100" id="kt_sign_in_form" action="{{ route('system.auth.purchase_code_verify') }}" method="post">

@@ -33,11 +33,21 @@ class AuthController extends Controller
     public function showPurchaseCodePage()
     {
 
+
         return view('system-auth::purchaseCode');
     }
 
     public function PurchaseCode(Request $request)
     {
+        $clientIp = $request->ip();
+
+        // Check if purchase code is already verified
+        $response = Http::get("http://192.168.12.79:8005/api/superadmin/get/{$clientIp}");
+
+        if ($response->ok() && !empty($response['purchase_code_verified']) && $response['purchase_code_verified'] == 1) {
+            return redirect()->route('system.auth.key')->with('message', 'Purchase code already verified');
+        }
+        
         $purchase_code = $request->input('purchase_code');
 
         // $response = Http::withToken('LjILXgU18qFsOG3pqtFDMKvcyRVGtP64')->get('https://api.envato.com/v3/market/author/sale?code=' .$purchase_code);
@@ -49,6 +59,7 @@ class AuthController extends Controller
             'purchase_code' => $purchase_code,
             'key' => $generatedKey,
             'email' => $generatedEmail,
+            'ip_address' => $request->ip(),
         ]);
 
         // }else{
@@ -59,8 +70,9 @@ class AuthController extends Controller
             session(['email' => $generatedEmail]);
             session(['key' => $generatedKey]);
             session(['purchase_code' => $purchase_code]);
-
             return redirect()->route('system.auth.key');
+            // }
+
         }
 
         // Handle error if purchase code is already present
@@ -71,6 +83,7 @@ class AuthController extends Controller
         return back()->withErrors(['purchase_code' => 'An unexpected error occurred.']);
 
     }
+
 
     protected function generateFormattedNumber()
     {
@@ -90,7 +103,7 @@ class AuthController extends Controller
 
     public function showKeyPage()
     {
-       
+
         return view('system-auth::key');
     }
 
@@ -277,7 +290,7 @@ class AuthController extends Controller
             }
 
             session(['session_key' => $sessionKey]); // Re-store it in session
-            // session(['purchase_code' => $keyData['purchase_code_verified']]); // Re-store it in session
+            session(['purchase_code' => $keyData['purchase_code']]); // Re-store it in session
         } else {
             $response = Http::withoutVerifying()
                 ->retry(3, 200)
@@ -285,6 +298,7 @@ class AuthController extends Controller
 
             $keyData = $response->json();
             session(['profile_logo' => $keyData['profile_logo']]);
+            session(['purchase_code' => $keyData['purchase_code']]);
         }
 
         $keyData = $response->json();
