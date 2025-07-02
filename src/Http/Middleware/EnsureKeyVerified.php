@@ -19,7 +19,7 @@ class EnsureKeyVerified
     //     // Allow access to `/key` if key is not verified
     //     if ($request->is('key') || $request->routeIs('system.auth.key')) {
     //         if ($key) {
-    //             $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
+    //             $data = Http::get('http://192.168.6.50:8005/api/superadmin/' . $key);
 
     //             if ($data->ok() && $data['verified']) {
     //                 return redirect()->route('system.auth.login')->with('message', 'Key already verified');
@@ -42,7 +42,7 @@ class EnsureKeyVerified
     //         return redirect()->route('system.auth.key')->with('error', 'Key verification required');
     //     }
 
-    //     $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
+    //     $data = Http::get('http://192.168.6.50:8005/api/superadmin/' . $key);
 
     //     if (!$data->ok() || !$data['verified']) {
     //         return redirect()->route('system.auth.key')->with('error', 'Key verification required');
@@ -68,17 +68,23 @@ class EnsureKeyVerified
 
     public function handle(Request $request, Closure $next)
     {
+        $purchase_code = session('purchase_code');
         $clientIp = $request->ip();
+        // if(!empty($purchase_code)){
+        //     $response = Http::get("http://192.168.6.50:8005/api/superadmin/purchase_code/{$purchase_code}");
+        // }elseif(!empty($clientIp)){
+        //     $response = Http::get("http://192.168.6.50:8005/api/superadmin/get/{$clientIp}");
+        // }
 
         // Get verification status using client IP
-        $response = Http::get("http://192.168.12.79:8005/api/superadmin/get/{$clientIp}");
 
+        $response = Http::get("http://192.168.6.50:8005/api/superadmin/get/{$clientIp}");
         if ($response->ok()) {
             $data = $response->json();
 
             // Handle purchase code route access
             if ($request->is('purchase_code') || $request->routeIs('system.auth.purchase_code')) {
-                 if ($request->isMethod('post')) {
+                if ($request->isMethod('post')) {
                     return $next($request);
                 }
                 // Block access to purchase_code route if already verified
@@ -105,7 +111,7 @@ class EnsureKeyVerified
         // Allow access to `/key` if key is not verified
         if ($request->is('key') || $request->routeIs('system.auth.key')) {
             if ($key) {
-                $data = Http::get('http://192.168.12.79:8005/api/superadmin/' . $key);
+                $data = Http::get('http://192.168.6.50:8005/api/superadmin/' . $key);
 
                 if ($data->ok() && $data['verified']) {
                     return redirect()->route('system.auth.login')->with('message', 'Key already verified');
@@ -126,7 +132,7 @@ class EnsureKeyVerified
         }
 
         $clientIp = $request->ip();
-        $data = Http::get('http://192.168.12.79:8005/api/superadmin/get/' . $clientIp);
+        $data = Http::get('http://192.168.6.50:8005/api/superadmin/get/' . $clientIp);
 
         // if key is deactived by super admin
         if (!$data->ok() || !$data['verified']) {

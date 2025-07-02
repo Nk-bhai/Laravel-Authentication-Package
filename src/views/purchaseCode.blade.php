@@ -87,17 +87,12 @@
                         <input class="form-control form-control-lg form-control-solid" type="text" name="purchase_code"
                             autocomplete="off" id="purchase_code"
                             />
-                        <div id="purchase_code_error" style="color: red"></div>
-                        {{-- @if(session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
+                        <div id="purchase_code_error" style="color: red">
+                            @error('purchase_code')
+                            {{$message}}
+                            @enderror
                         </div>
-                        @endif --}}
-                        {{-- @if(isset($errors) && $errors->has('key'))
-                        <div style="color:red">
-                            {{ $errors->first('key') }}
-                        </div>
-                        @endif --}}
+                        
 
                     </div>
                     <div class="text-center">
@@ -115,7 +110,7 @@
                     reserved.</span>
             </div>
         </footer>
-    </div>
+    </div>  
 </body>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -130,26 +125,23 @@
     });
 
     $(document).ready(function () {
-        $("#key").on("input", ValidateKey);
+        $("#purchase_code").on("input", ValidatePurchaseCode);
 
         $("#kt_sign_in_form").submit(function (e) {
-            let key = ValidateKey();
-            if (!key) {
+            let purchase_code = ValidatePurchaseCode();
+            if (!purchase_code) {
                 e.preventDefault();
             }
         });
     });
 
-    function ValidateKey() {
-        let key = $("#key").val();
-        if (key === "") {
-            $("#key_error").html("Key cannot be empty");
-            return false;
-        } else if (key.length !== 14) {
-            $("#key_error").html("Key must be of 14 digits");
+    function ValidatePurchaseCode() {
+        let purchase_code = $("#purchase_code").val();
+        if (purchase_code === "") {
+            $("#purchase_code_error").html("Purchase Code cannot be empty");
             return false;
         } else {
-            $("#key_error").html("");
+            $("#purchase_code_error").html("");
             return true;
         }
     }  
