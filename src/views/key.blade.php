@@ -81,6 +81,7 @@
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
+                    {{-- key --}}
                     <div class="modal-body d-flex align-items-center gap-3">
                         <span>Key : </span>
                         <span id="sessionKeyText" class="text-gray-700 fw-semibold fs-6 flex-grow-1"> 
@@ -89,7 +90,7 @@
                         {{-- Copy Button --}}
                         <button id="copyBtn" type="button" class="btn btn-icon btn-sm btn-light-primary"
                             onclick="copySessionKey()" title="Copy">
-                            <span id="copyIcon"><i class="fa-solid fa-copy"></i></span>
+                            <span id="copyKeyIcon"><i class="fa-solid fa-copy"></i></span>
                         </button>
                     </div>
                     {{-- email --}}
@@ -101,7 +102,7 @@
                         {{-- Copy Button --}}
                         <button id="copyBtn" type="button" class="btn btn-icon btn-sm btn-light-primary"
                             onclick="copySessionEmail()" title="Copy">
-                            <span id="copyIcon"><i class="fa-solid fa-copy"></i></span>
+                            <span id="copyEmailIcon"><i class="fa-solid fa-copy"></i></span>
                         </button>
                     </div>
                     <div class="modal-footer d-flex justify-content-end">
@@ -115,9 +116,9 @@
             function copySessionKey() {
                 const text = document.getElementById('sessionKeyText').innerText;
                 navigator.clipboard.writeText(text).then(() => {
-                    document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
+                    document.getElementById('copyKeyIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
                     setTimeout(() => {
-                        document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-copy"></i>';
+                        document.getElementById('copyKeyIcon').innerHTML = '<i class="fa-solid fa-copy"></i>';
                     }, 2000);
                 }).catch(err => {
                     console.error('Copy failed:', err);
@@ -126,9 +127,9 @@
             function copySessionEmail() {
                 const text = document.getElementById('sessionEmailText').innerText;
                 navigator.clipboard.writeText(text).then(() => {
-                    document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
+                    document.getElementById('copyEmailIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
                     setTimeout(() => {
-                        document.getElementById('copyIcon').innerHTML = '<i class="fa-solid fa-copy"></i>';
+                        document.getElementById('copyEmailIcon').innerHTML = '<i class="fa-solid fa-copy"></i>';
                     }, 2000);
                 }).catch(err => {
                     console.error('Copy failed:', err);
@@ -145,11 +146,6 @@
             });
         </script>
     @endif
-
-
-
-
-
 
     {{-- Error Popup --}}
     @if(session('error'))

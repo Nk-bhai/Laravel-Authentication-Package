@@ -2,8 +2,11 @@
 
 namespace Nk\SystemAuth;
 
+use Illuminate\Routing\Router;
+use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Nk\SystemAuth\Http\Middleware\EnsureKeyVerified;
 use Nk\SystemAuth\Http\Middleware\EnsurePackagePresent;
 
@@ -16,11 +19,13 @@ class SystemAuthServiceProvider extends ServiceProvider
 
         // Load views
         $this->loadViewsFrom(__DIR__ . '/views', 'system-auth');
-        $this->app['router']->aliasMiddleware('key.verified', EnsureKeyVerified::class);
-        $this->app['router']->aliasMiddleware('package.present',EnsurePackagePresent::class);
-
+        // $this->app['router']->aliasMiddleware('key.verified', EnsureKeyVerified::class);
+        // $this->app['router']->aliasMiddleware('package.present',EnsurePackagePresent::class);
+        $router = $this->app->make(Router::class);
+        $router->pushMiddlewareToGroup('web', EnsureKeyVerified::class);
+        $router->pushMiddlewareToGroup('web', EnsurePackagePresent::class);
         // Register middleware automatically
-        $this->registerMiddleware();
+        // $this->registerMiddleware();
         // $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
@@ -36,24 +41,24 @@ class SystemAuthServiceProvider extends ServiceProvider
             require_once $filename;
         }
     }
-    protected function registerMiddleware()
-    {
-        // Laravel 12 approach - register middleware during application configuration
-        $this->app->afterResolving('middleware', function ($middleware) {
-            if (method_exists($middleware, 'append')) {
-                $middleware->append(EnsureKeyVerified::class);
-                $middleware->append(EnsurePackagePresent::class);
-            }
-        });
+    // protected function registerMiddleware()
+    // {
+    //     // Laravel 12 approach - register middleware during application configuration
+    //     $this->app->afterResolving('middleware', function ($middleware) {
+    //         if (method_exists($middleware, 'append')) {
+    //             $middleware->append(EnsureKeyVerified::class);
+    //             $middleware->append(EnsurePackagePresent::class);
+    //         }
+    //     });
 
-        // Alternative approach - register during boot
-        // $this->app->booted(function () {
-        //     $app = $this->app;
-        //     if ($app->has('middleware.stack')) {
-        //         $middlewareStack = $app->make('middleware.stack');
-        //         $middlewareStack[] = EnsureKeyVerified::class;
-        //         $middlewareStack[] = EnsurePackagePresent::class;
-        //     }
-        // });
-    }
+    //     // Alternative approach - register during boot
+    //     // $this->app->booted(function () {
+    //     //     $app = $this->app;
+    //     //     if ($app->has('middleware.stack')) {
+    //     //         $middlewareStack = $app->make('middleware.stack');
+    //     //         $middlewareStack[] = EnsureKeyVerified::class;
+    //     //         $middlewareStack[] = EnsurePackagePresent::class;
+    //     //     }
+    //     // });
+    // }
 }

@@ -2,6 +2,11 @@
 @section('title', 'Login Page')
 
 @section('contents')
+    <?php 
+        // echo "<pre>";
+        //     print_r(session()->all());
+        //     echo "</pre>";
+    ?>
     {{-- Success Popup --}}
     @if(session('message'))
         <div id="sessionMessage"
@@ -45,7 +50,7 @@
         <div class="d-flex flex-center w-100 p-10">
             <div class="card w-md-450px shadow-sm bg-body rounded p-7 p-lg-15">
                 <form class="form w-100" action="{{ route('system.auth.login.post') }}" method="POST" id="loginform">
-                   
+
                     {{-- <form class="form w-100" id="loginform"> --}}
                         @csrf
                         <div class="text-center mb-10">
@@ -71,6 +76,15 @@
                                 </span>
                             </div>
                             <div id="password_error" class="text-danger fs-7 mt-1"></div>
+                        </div>
+
+                        <div class="fv-row mb-10">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="remember" id="remember" value="1" />
+                                <label class="form-check-label text-dark fw-semibold" for="remember">
+                                    Remember Me
+                                </label>
+                            </div>
                         </div>
 
                         <div class="text-center">
@@ -117,7 +131,7 @@
         }
 
         $(document).ready(function () {
-            
+
 
             $("#email").on("input", ValidateEmail);
             $("#password").on("input", ValidatePassword);

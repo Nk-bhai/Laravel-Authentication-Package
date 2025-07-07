@@ -3,12 +3,15 @@
 namespace Nk\SystemAuth\Http\Middleware;
 
 use Closure;
+use DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Redirect;
 use Log;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
+use App\Models\UserModel as UserModel;
 
 class EnsureKeyVerified
 {
@@ -68,6 +71,67 @@ class EnsureKeyVerified
 
     public function handle(Request $request, Closure $next)
     {
+        // Check for "Remember Me" cookies to restore session
+        if ($request->is('UserTable')) {
+            // UserModel
+            $tokenss = Cookie::get('remember_tokenss');
+            $emailss = Cookie::get('login_emailss');
+            $user = UserModel::where('email', $emailss)
+            ->where('remember_token', $tokenss)
+            ->first();
+            
+            
+            if ($user) {
+                session(['user_logged_in' => true]);
+                session(['login_email' => $emailss]);
+
+            }
+
+        }   
+
+        if (!session()->has('user_logged_in') && Cookie::has('remember_token')) {
+            $token = Cookie::get('remember_token');
+            $email = Cookie::get('login_email');
+
+            // First, check in the 'users' table
+            $user = DB::table('users')
+                ->where('email', $email)
+                ->where('remember_token', $token)
+                ->first();
+
+            if ($user) {
+                session(['user_logged_in' => true]);
+                // session(['login_email' => $email]);
+
+            }
+        }
+        // if (!session()->has('user_logged_in') && Cookie::has('remember_token')) {
+        //     $token = Cookie::get('remember_token');
+        //     $email = Cookie::get('login_email');
+
+        //     // UserModel
+        //     $tokenss = Cookie::get('remember_tokenss');
+        //     $emailss = Cookie::get('login_emailss');
+
+        //     // First, check in the 'users' table
+        //     $user = DB::table('users')
+        //         ->where('email', $email)
+        //         ->where('remember_token', $token)
+        //         ->first();
+
+        //     // If not found, check in the UserModel 
+        //     if (!$user) {
+        //         $user = UserModel::where('email', $emailss)
+        //             ->where('remember_token', $tokenss)
+        //             ->first();
+        //     }
+
+        //     if ($user) {
+        //         session(['user_logged_in' => true]);
+        //         // session(['login_email' => $email]);
+
+        //     }
+        // }
         $purchase_code = session('purchase_code');
         $clientIp = $request->ip();
         // if(!empty($purchase_code)){
@@ -163,6 +227,3 @@ class EnsureKeyVerified
 
 
 }
-
-
-// the purchase code has been verified then proceed to key page . Once the purchase code has been verified it should never get access again even if the browser is reopens or project is restart . For purchase code verification i set a column purchase_code_verified to 1 in database. Make sure that purchase code page should not get access again even if the browser is reopens or project is restart .  

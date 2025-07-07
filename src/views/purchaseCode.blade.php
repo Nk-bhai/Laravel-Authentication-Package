@@ -88,11 +88,7 @@
                             autocomplete="off" id="purchase_code"
                             />
                         <div id="purchase_code_error" style="color: red">
-                            @error('purchase_code')
-                            {{$message}}
-                            @enderror
                         </div>
-                        
 
                     </div>
                     <div class="text-center">
